@@ -1,0 +1,41 @@
+#!/bin/bash -ex
+#
+# Installation script for Python
+# https://www.python.org
+
+set -eu -o pipefail
+
+function find_latest_python_version()
+{
+    git ls-remote --tags git://github.com/python/cpython.git \
+    | grep -v '\.[0-9]\{1,2\}\(a[0-9]\+\|b\|rc\)' \
+    | grep -oh 'v[0-9]\{1,2\}\.[0-9]\{1,2\}\(\.[0-9]\{1,2\}\)\?' \
+    | sort --version-sort -r \
+    | head -n 1
+}
+
+# install python
+if [[ "$DISTRI" != "arch" ]]; then
+    # Arch linux has a pretty good up-to date python version available
+    # through pacman. Unfortunately, ubuntu doesn't :(
+
+    VERSION=$(find_latest_python_version)
+	git clone https://github.com/python/cpython.git
+
+	cd cpython
+	git checkout "$VERSION"
+
+	./configure --prefix="$OLDPWD/$VERSION"
+	make
+	make install
+
+	# make the bin and share directories available
+	cd ..
+	ln -sf "$VERSION/bin" .
+	ln -sf "$VERSION/share" . 
+
+	rm -rf cpython
+fi
+
+# install virtualenvwrapper
+python3 -m pip install virtualenvwrapper

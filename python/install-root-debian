@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Debian's root install script for Python
+# https://www.python.org
+
+set -eu -o pipefail
+
+DEBIAN_FRONTEND=noninteractive apt-get update -q -y
+DEBIAN_FRONTEND=noninteractive apt-get -q -y install zlib1g-dev libffi-dev \
+    libssl-dev libbz2-dev libncursesw5-dev libgdbm-dev liblzma-dev libsqlite3-dev \
+    tk-dev uuid-dev libreadline-dev
