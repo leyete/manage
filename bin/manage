@@ -1,0 +1,415 @@
+#!/usr/bin/env bash
+set -eu -o pipefail
+
+MANAGE_ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
+
+# ------------------------------------------------------------------------------
+#   LOGGING FUNCTIONS
+# ------------------------------------------------------------------------------
+
+function manage_log()
+{
+    local COLOR="$1"
+    shift
+
+    echo "${COLOR}MANAGE | $ENVIRONMENT |$(tput sgr0 2>/dev/null) $@"
+}
+
+function log_info()
+{
+    manage_log "$(tput setaf 4 2>/dev/null)" "$@"
+}
+
+function log_warn()
+{
+    manage_log "$(tput setaf 3 2>/dev/null)" "$@"
+}
+
+function log_fatal()
+{
+    manage_log "$(tput setaf 1 2>/dev/null)" "$@"
+    exit 1
+}
+
+# ------------------------------------------------------------------------------
+#   MISC FUNCTIONS
+# ------------------------------------------------------------------------------
+
+function detect_distribution()
+{
+    if [ ! -f /etc/os-release ]; then
+        log_fatal "Cannot read /etc/os-release, you may need to supply the" \
+            "MANAGE_DISTRI environment variable with the distribution name."
+    fi
+
+    os_release_id="$(cat /etc/os-release | grep -oE '^ID=([A-Za-z]+)$' | cut -d'=' -f2)"
+    case "$os_release_id" in
+        *arch*)
+            echo "arch"
+            ;;
+        *debian*)
+            echo "debian"
+            ;;
+        *ubuntu*)
+            echo "ubuntu"
+            ;;
+        *)
+            log_fatal "Unknown linux distribution $os_release_id, you will have" \
+                "to supplythe MANAGE_DISTRI environment variable with the" \
+                "distribution name."
+    esac
+}
+
+function is_env_installed()
+{
+    git status --ignored "$1" | egrep -q 'Untracked|Ignored'
+}
+
+function verify_env_sanity()
+{
+    if [[ -z "$ENVIRONMENT" ]]; then
+        ENVIRONMENT="$COMMAND" log_warn "must provide, at least, one environment for $COMMAND"
+        usage
+        exit 1
+    fi
+
+    if [[ ! -d "$MANAGE_ROOT/$ENVIRONMENT" ]]; then
+        ENVIRONMENT="$COMMAND" log_fatal "invalid environment $ENVIRONMENT"
+    fi
+}
+
+function clean_env()
+{
+    git clean -dffx . >/dev/null 2>&1
+}
+
+function link_file()
+{
+    local FILE DEST action
+
+    FILE="$1"
+    DEST="$2"
+    SKIP=${SKIP:-0}
+    OVERWRITE=${OVERWRITE:-0}
+    BACKUP=${BACKUP:-0}
+
+    if [[ -f "$DEST" || -d "$DEST" || -L "$DEST" ]]; then
+        # check if the destination is a link to $FILE
+        if [[ "$(readlink $DEST)" == "$FILE" ]]; then
+            SKIP=1
+        else
+            if [[ "$SKIP" -eq 0 && "$OVERWRITE" -eq 0 && "$BACKUP" -eq 0 ]]; then
+                log_warn "file '$DEST' ($(basename $FILE)) already exists, what \
+                do you want to do?\n\
+                [s]kip, [o]verwrite, [b]ackup (any other key to skip):"
+
+                read -n 1 action && echo
+                case "$action" in
+                    o | O)
+                        OVERWRITE=1
+                        ;;
+                    b | B)
+                        BACKUP=1
+                        ;;
+                    *)
+                        SKIP=1
+                        ;;
+                esac
+            fi
+        fi
+    fi
+
+    if [[ "$SKIP" -eq 1 ]]; then
+        log_info "file '$FILE' skipped"
+        return
+    fi
+
+    if [[ "$OVERWRITE" -eq 1 ]]; then
+        ln -sf "$FILE" "$DEST"
+        return
+    fi
+
+    if [[ "$BACKUP" -eq 1 ]]; then
+        mv "$DEST" "${DEST}.backup"
+    fi
+
+    ln -s "$FILE" "$DEST"
+}
+
+# ------------------------------------------------------------------------------
+#   INSTALL COMMAND
+# ------------------------------------------------------------------------------
+
+function cmd_install_usage()
+{
+    cat <<EOF
+usage: $(basename $0) [FLAGS] install [OPTIONS] ENV ...
+
+Install the supplied environments and link the corresponding binaries and dotfiles.
+
+OPTIONS:
+    -d      Link appropriate dotfiles (according to the link file)
+    
+Execute $(basename $0) to see available flags.
+EOF
+}
+
+function cmd_install()
+{
+    local OPTIND op
+
+    while getopts ":d" op
+    do
+        case "$op" in
+            d)
+                LINK_DOTFILES=1
+                ;;
+            *)
+                log_fatal "unknown option ($op)"
+        esac
+    done
+    shift $((OPTIND-1))
+
+    [[ -z "${LINK_DOFTILES+x}" ]] && LINK_DOTFILES=1
+
+    ENVIRONMENT_LIST="$@"
+    [[ -z "$ENVIRONMENT_LIST" ]] && ENVIRONMENT="install" log_fatal "an environment is required"
+    
+    for ENVIRONMENT in "$ENVIRONMENT_LIST"
+    do
+        verify_env_sanity
+        cd $ENVIRONMENT
+        
+        # the first line in all install scripts should have the -ex flags
+        if [ $(for i in install install-root* uninstall uninstall-root*; do if [ -e "$i" ]; then head -1 "$i"; fi; done | \
+             sort | uniq | grep -v '^#!/bin/bash -ex$' | wc -l) -ne 0 ]
+        then
+            log_fatal "not all install/uninstall scripts start with #!/bin/bash -ex"
+        fi
+
+        log_info "starting install, logging to $PWD/install.log"
+        rm -f install.log
+
+        # distribution-specific dependencies
+        if [[ $(find . -name 'install-root*' | wc -l) -ge 1 ]]; then
+            INSTALL_ROOT_SCRIPT="./install-root-$MANAGE_DISTRI"
+            # use debian install script if we are on ubuntu and no specific
+            # install script is available
+            if [[ "$MANAGE_DISTRI" == "ubuntu" && ! -x "$INSTALL_ROOT_SCRIPT" && \
+                -x "./install-root-debian" ]]
+            then
+                INSTALL_ROOT_SCRIPT="./install-root-debian"
+            fi
+
+            if [[ -x "$INSTALL_ROOT_SCRIPT" && "$ALLOW_SUDO" -eq 1 ]]; then
+                set +e
+                if [[ "$VERBOSE_OUTPUT" -eq 1 ]]; then
+                    sudo env DISTRI=$MANAGE_DISTRI "$INSTALL_ROOT_SCRIPT" 2>&1 | tee -a install.log
+                else
+                    sudo env DISTRI=$MANAGE_DISTRI "$INSTALL_ROOT_SCRIPT" >> install.log 2>&1
+                fi
+                INSTALL_FAILED=$?
+                set -e
+
+                if [[ "$INSTALL_FAILED" -eq 0 ]]; then
+                    log_info "system dependencies installed"
+                else
+                    log_warn "INSTALL FAILED: $INSTALL_ROOT_SCRIPT failed to install dependencies"
+                    cat install.log >&2
+
+                    # clean before exiting
+                    clean_env
+                    exit 1
+                fi
+            else
+                log_warn "make sure build dependencies are installed!"
+            fi
+        fi
+
+        # execute install script
+        set +e
+        if [[ "$VERBOSE_OUTPUT" -eq 1 ]]; then
+            DISTRI=$MANAGE_DISTRI PATH=$MANAGE_ROOT/bin/:$PATH nice -n$NICE_LEVEL ./install 2>&1 | tee -a install.log
+        else
+            DISTRI=$MANAGE_DISTRI PATH=$MANAGE_ROOT/bin/:$PATH nice -n$NICE_LEVEL ./install >>install.log 2>&1
+        fi
+        INSTALL_FAILED=$?
+        set -e
+
+        if [[ "$INSTALL_FAILED" -eq 0 ]]; then
+            log_info "install finished"
+        else
+            log_warn "INSTALL FAILED"
+            cat install.log >&2
+
+            # clean before exiting
+            clean_env
+            exit 1
+        fi
+
+        cd ..
+        LINK_DOTFILES=$LINK_DOTFILES $0 link -b $ENVIRONMENT
+    done
+}
+
+# ------------------------------------------------------------------------------
+#   LINK COMMAND
+# ------------------------------------------------------------------------------
+
+function cmd_link_usage()
+{
+    cat <<EOF
+usage: $(basename $0) [FLAGS] link [OPTIONS] ENV ...
+
+Link binaries and dotfiles for the supplied environments.
+
+OPTIONS:
+    -S      If symbolic link exists, skip it (do nothing)
+    -O      If symbolic link exists, overwrite it
+    -B      If symbolic link exists, back it up before overwriting
+    -b      Link binaries (from bin subdirectory)
+    -d      Link dotfiles (according to link file)
+
+Execute $(basename $0) with no arguments to see the available flags.
+EOF
+}
+
+function cmd_link()
+{
+    local OPTIND op
+
+    while getopts ":dbSOB" op
+    do
+        case "$op" in
+            d)
+                LINK_DOTFILES=1
+                ;;
+            b)
+                LINK_BINARIES=1
+                ;;
+            S)
+                SKIP=1
+                ;;
+            O)
+                OVERWRITE=1
+                ;;
+            B)
+                BACKUP=1
+                ;;
+            *)
+                log_fatal "unknown option ($op)"
+        esac
+    done
+    shift $((OPTIND-1))
+
+    [[ -z "$LINK_DOFTILES" ]] && LINK_DOTFILES=1
+    [[ -z "$LINK_BINARIES" ]] && LINK_BINARIES=1
+    [[ -z "$SKIP" ]] && SKIP=1
+    [[ -z "$OVERWRITE" ]] && OVERWRITE=1
+    [[ -z "$BACKUP" ]] && BACKUP=1
+
+    ENVIRONMENT_LIST="$@"
+    [[ -z "$ENVIRONMENT_LIST" ]] && ENVIRONMENT="link" log_fatal "an environment is required"
+    
+    for ENVIRONMENT in "$ENVIRONMENT_LIST"
+    do
+        # link binaries
+        if [[ "$LINK_BINARIES" -eq 1 ]]; then
+            verify_env_sanity
+            if [ -d $ENVIRONMENT/bin ]; then
+                for f in $PWD/$ENVIRONMENT/bin/*
+                do
+                    link_file "$f" "$PWD/bin/$(basename $f)"
+                done
+                log_info "bin symlinks updated"
+            fi
+        fi
+
+        # link dotfiles
+
+    done
+}
+
+# ------------------------------------------------------------------------------
+#   MANAGE TOOL
+# ------------------------------------------------------------------------------
+
+function usage()
+{
+    cat <<EOF
+usage: $(basename $0) [FLAGS] COMMAND [COMMAND OPTIONS]
+
+FLAGS:
+    -s              allow sudo operations (like installing depenencies)
+    -v              set verbose output
+    -h              show command-specific usage
+
+COMMANDS:
+    install         install the supplied tools/environments
+    link            link binaries and dotfiles
+
+EOF
+}
+
+
+if [[ $# -eq 0 ]]; then
+    usage
+    exit
+fi
+
+[[ -z "${MANAGE_DISTRI+x}" ]] && export MANAGE_DISTRI="$(detect_distribution)"
+
+# parse the script flags
+while getopts ":svnh" op
+do
+    case "$op" in
+        s)
+            export ALLOW_SUDO=1
+            ;;
+        v)
+            export VERBOSE_OUTPUT=1
+            ;;
+        h)
+            export SHOW_HELP=1
+            ;;
+        n)
+            export NICE_LEVEL=10
+            ;;
+        *)
+            ENVIRONMENT="ERROR" mange_log "" "unknown flag ($op)"
+            usage
+            exit 1
+    esac
+done
+shift $((OPTIND-1))
+
+[[ -z "${SHOW_HELP+x}" ]] && export SHOW_HELP=0
+[[ -z "${ALLOW_SUDO+x}" ]] && export ALLOW_SUDO=0
+[[ -z "${VERBOSE_OUTPUT+x}" ]] && export VERBOSE_OUTPUT=0
+[[ -z "${NICE_LEVEL+x}" ]] && export NICE_LEVEL=0
+
+# parse the command
+COMMAND="$1"
+shift
+
+if [[ -z "$COMMAND" ]]; then
+    ENVIRONMENT="ERROR" manage_log "" "missing command"
+    usage
+    exit 1
+fi
+
+case "$COMMAND" in
+    install)
+        if [[ $SHOW_HELP -eq 1 ]]; then  # show command usage
+            cmd_${COMMAND}_usage
+            exit
+        fi
+
+        cmd_$COMMAND "$@"
+        ;;
+
+    *)
+        ENVIRONMENT="$COMMAND" manage_log "" "unknown command ($COMMAND)"
+        usage
+        exit 1
+esac

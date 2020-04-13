@@ -1,0 +1,8 @@
+*/*
+bin/*
+!bin/manage
+!*/install
+!*/install-root-*
+!*/uninstall
+!*/uninstall-root-*
+!*/upgrade
