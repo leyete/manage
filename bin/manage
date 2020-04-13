@@ -164,13 +164,17 @@ function cmd_install()
             d)
                 LINK_DOTFILES=1
                 ;;
+            r)
+                REINSTALL=1
+                ;;
             *)
                 log_fatal "unknown option ($op)"
         esac
     done
     shift $((OPTIND-1))
 
-    [[ -z "${LINK_DOFTILES+x}" ]] && LINK_DOTFILES=1
+    [[ -z "${LINK_DOFTILES+x}" ]] && LINK_DOTFILES=0
+    [[ -z "${REINSTALL+x}" ]] && REINSTALL=0
 
     ENVIRONMENT_LIST="$@"
     [[ -z "$ENVIRONMENT_LIST" ]] && ENVIRONMENT="install" log_fatal "an environment is required"
@@ -179,6 +183,13 @@ function cmd_install()
     do
         verify_env_sanity
         cd $ENVIRONMENT
+
+        if [ "$REINSTALL" -eq 0 ] && is_env_installed "."; then
+            log_info "environment already installed, use -r to reinstall"
+            exit 0
+        fi
+
+        clean_env
         
         # the first line in all install scripts should have the -ex flags
         if [ $(for i in install install-root* uninstall uninstall-root*; do if [ -e "$i" ]; then head -1 "$i"; fi; done | \
@@ -188,7 +199,6 @@ function cmd_install()
         fi
 
         log_info "starting install, logging to $PWD/install.log"
-        rm -f install.log
 
         # distribution-specific dependencies
         if [[ $(find . -name 'install-root*' | wc -l) -ge 1 ]]; then
@@ -399,8 +409,8 @@ if [[ -z "$COMMAND" ]]; then
 fi
 
 case "$COMMAND" in
-    install)
-        if [[ $SHOW_HELP -eq 1 ]]; then  # show command usage
+    install|link)
+        if [[ "$SHOW_HELP" -eq 1 ]]; then  # show command usage
             cmd_${COMMAND}_usage
             exit
         fi
