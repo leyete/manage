@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Mononoki Nerd Font:pixelsize=23:antialias=true:autohint=true:dpi=192";
+static char *font = "Inconsolata Nerd Font:pixelsize=23:antialias=true:autohint=true:dpi=192";
 static int borderpx = 2;
 
 /*
