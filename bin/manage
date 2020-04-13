@@ -158,7 +158,7 @@ function cmd_install()
 {
     local OPTIND op
 
-    while getopts ":d" op
+    while getopts ":dr" op
     do
         case "$op" in
             d)
@@ -168,7 +168,7 @@ function cmd_install()
                 REINSTALL=1
                 ;;
             *)
-                log_fatal "unknown option ($op)"
+                ENVIRONMENT="install" log_fatal "unknown option ($op)"
         esac
     done
     shift $((OPTIND-1))
@@ -312,11 +312,11 @@ function cmd_link()
     done
     shift $((OPTIND-1))
 
-    [[ -z "$LINK_DOFTILES" ]] && LINK_DOTFILES=1
-    [[ -z "$LINK_BINARIES" ]] && LINK_BINARIES=1
-    [[ -z "$SKIP" ]] && SKIP=1
-    [[ -z "$OVERWRITE" ]] && OVERWRITE=1
-    [[ -z "$BACKUP" ]] && BACKUP=1
+    [[ -z "${LINK_DOFTILES+x}" ]] && LINK_DOTFILES=0
+    [[ -z "${LINK_BINARIES+x}" ]] && LINK_BINARIES=0
+    [[ -z "${SKIP+x}" ]] && SKIP=0
+    [[ -z "${OVERWRITE+x}" ]] && OVERWRITE=0
+    [[ -z "${BACKUP+x}" ]] && BACKUP=0
 
     ENVIRONMENT_LIST="$@"
     [[ -z "$ENVIRONMENT_LIST" ]] && ENVIRONMENT="link" log_fatal "an environment is required"
