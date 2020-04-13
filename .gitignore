@@ -6,3 +6,4 @@ bin/*
 !*/uninstall
 !*/uninstall-root-*
 !*/upgrade
+!*/dotfiles

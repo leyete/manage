@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+
+
+
+
+git clone https://git.suckless.org/st source
+cp dotfiles/config.h source/config.h
+cd source
+make install PREFIX="$OLDPWD"
