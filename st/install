@@ -1,9 +1,15 @@
 #!/bin/bash -ex
+#
+# Installation script for the suckless terminal (st)
+# https://st.suckless.org
 
-
-
-
+# get the source code from the git repo
 git clone https://git.suckless.org/st source
+
+# copy our configuration header file
 cp dotfiles/config.h source/config.h
+
+# compile and install
 cd source
 make install PREFIX="$OLDPWD"
+cd ..
