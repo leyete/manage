@@ -8,4 +8,5 @@ bin/*
 !*/upgrade
 !*/upgrade-root-*
 !*/.dotfiles
+!*/links
 !.fonts/*

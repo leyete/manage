@@ -1,0 +1,5 @@
+bspwmrc : $HOME/.config/bspwm/bspwmrc
+sxhkdrc : $HOME/.config/sxhkdrc/sxhkdrc
+xinitrc : $HOME/.xinitrc
+xprofile : $HOME/.config/.xprofile
+Xresources : $HOME/.config/.Xresources
