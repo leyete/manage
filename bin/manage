@@ -327,7 +327,7 @@ cmd_link() {
 
         # link binaries
         if [[ "$LINK_BINARIES" -eq 1 && -d "./bin" ]]; then
-            for f in "$PWD/bin/*"; do
+            for f in $PWD/bin/*; do
                 link_file "$f" "$OLDPWD/bin/$(basename $f)"
             done
             log_info "bin symlinks updated"
