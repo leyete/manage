@@ -6,5 +6,6 @@ bin/*
 !*/uninstall
 !*/uninstall-root-*
 !*/upgrade
-!*/dotfiles
+!*/upgrade-root-*
+!*/.dotfiles
 !.fonts/*
