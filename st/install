@@ -12,7 +12,7 @@ cp .dotfiles/config.h source/config.h
 cd source
 
 # download patches
-suckless_patch="https://st.suckless.org/suckless/patches"
+suckless_patch="https://st.suckless.org/patches"
 
 patches=(
     "$suckless_patch/alpha/st-alpha-0.8.2.diff"  # change background opacity
