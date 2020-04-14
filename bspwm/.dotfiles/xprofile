@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Further customization of X user sessions
+# https://wiki.archlinux.org/index.php/Xprofile
+
+# ------------------------------------------------------------------------------
+#   ENVIRONMENT VARIABLES
+# ------------------------------------------------------------------------------
+
+export TERMINAL=st
+
+# ------------------------------------------------------------------------------
+#   KEYBOARD
+# ------------------------------------------------------------------------------
+
+# change the behaviour of the CAPS LOCK key:
+#
+# - when combined with another key, treat it as CTRL
+# - when short-pressed (300 ms), treat it as ESC
+
+setxkbmap -option ctrl:nocaps
+
+[ "$(pgrep xcape | wc -l)" -gt 0 ] && killall xcape 2>/dev/null
+xcape -t 300 -e 'Control_L=Escape'
+
+# set keyboard key repeat rate
+xset r rate 190 35
+
+# ------------------------------------------------------------------------------
+#   STARTUP PROCESSES
+# ------------------------------------------------------------------------------
+
+unclutter &     # hide the X mouse cursor when not needed

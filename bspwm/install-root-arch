@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for my bspwm setup
+# https://github.com/baskerville/bspwm
+
+# install Xorg subsystem
+pacman -Syu --noconfirm xorg-server xorg-font-encodings xorg-bdftopcf \
+    xorg-mkfontscale xorg-mkfontdir xorg-font-util xorg-font-utils xorg-xauth \
+    xorg-xrdb xorg-xmodmap xorg-xrandr xorg-set xorg-xinit
+
+# install more required packages
+pacman -Syu --noconfirm unclutter xcape picomp
+
+# install bspwm and sxhkd
+pacman -Syu --noconfirm bspwm sxhkd

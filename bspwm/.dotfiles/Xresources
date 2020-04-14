@@ -1,0 +1,11 @@
+! Xresources / this file is written for a 4k display, adjust DPI for
+! others manually
+
+! Xft settings -----------------------------------------------------------------
+Xft.autohint:   0
+Xft.dpi:        144
+Xft.antialias:  false
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.lcdfilter:  lcddefault

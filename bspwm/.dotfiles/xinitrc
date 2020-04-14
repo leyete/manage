@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# Startup configuration shell script for xinit/startx.
+# https://wiki.archlinux.org/index.php/Xinit
+
+# ------------------------------------------------------------------------------
+#   VARIABLES WITH PATHS
+# ------------------------------------------------------------------------------
+
+# Xresources
+userresources=$HOME/.config/.Xresources
+sysresources=/etc/X11/xinit/.Xresources
+
+# Xmodmap
+sysmodmap=/etc/X11/xinit/.Xmodmap
+
+# xinitrc.d directory
+xinitrcd=/etc/X11/xinit/xinitrc.d/
+
+# ------------------------------------------------------------------------------
+#   SETUP
+# ------------------------------------------------------------------------------
+
+# merge Xresources
+[ -f $sysresources ] && xrdb -merge $sysresources
+[ -f $userresources ] && xrdb -merge $userresources
+
+[ -f $sysmodmap ] && xmodmap $sysmodmap
+
+# add custom user font path
+xset -fp $HOME/.local/share/fonts/
+
+if [ -d $xinitrcd ]; then
+    for f in $xinitrcd/?*.sh; do
+        [ -x "$f" ] && . "$f"
+    done
+    unset f
+fi
+
+# ------------------------------------------------------------------------------
+#   STARTUP PROGRAMS
+# ------------------------------------------------------------------------------
+
+# souce xprofile
+[ -f $HOME/.config/.xprofile ] && . $HOME/.config/.xprofile
+
+# start window manager (bspwm)
+exec /usr/bin/bspwm
