@@ -145,6 +145,8 @@ run_script()
     declare script="$1" log_file="$2"
     local script_failed
 
+    [[ ! -x "./$script" ]] && return  # nothing to execute
+
     set +e
     if [[ "$VERBOSE_OUTPUT" -eq 1 ]]; then
         DISTRI=$DISTRI PATH="$MANAGE_ROOT/bin/:$PATH" nice -n$NICE_LEVEL "./$script" 2>&1 | tee -a "$log_file"
@@ -468,7 +470,7 @@ cmd_list() {
     uninstalled=${uninstalled:-0}
 
     for e in *; do
-        [[ ! -e "$e/install" && ! -d "$e/.dotfiles" ]] && continue
+        [[ "$(find $e -name 'install*' -o -name '.dotfiles' 2>/dev/null | wc -l)" -eq 0 ]] && continue
 
         if is_env_installed "$e"; then
             [[ "$installed" -eq 1 ]] && echo "$e"

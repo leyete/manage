@@ -4,12 +4,12 @@
 # https://github.com/baskerville/bspwm
 
 # install Xorg subsystem
-pacman -Syu --noconfirm xorg-server xorg-font-encodings xorg-bdftopcf \
+pacman -Syu --noconfirm xorg-server xorg-fonts-encodings xorg-bdftopcf \
     xorg-mkfontscale xorg-mkfontdir xorg-font-util xorg-font-utils xorg-xauth \
-    xorg-xrdb xorg-xmodmap xorg-xrandr xorg-set xorg-xinit
+    xorg-xrdb xorg-xmodmap xorg-xrandr xorg-xset xorg-xinit
 
 # install more required packages
-pacman -Syu --noconfirm unclutter xcape picomp
+pacman -Syu --noconfirm unclutter xcape picom
 
 # install bspwm and sxhkd
 pacman -Syu --noconfirm bspwm sxhkd
