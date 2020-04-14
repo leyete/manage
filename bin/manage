@@ -90,12 +90,12 @@ link_file() {
         
         # if the destination file exists but it isn't a link to $file, back it
         # up before linking
-        mv "$dest" "${dest}.old"
+        [[ ${USE_SUDO:-0} -eq 1 ]] && sudo mv "$dest" "${dest}.old" || mv "$dest" "${dest}.old"
         log_warn "$dest file already exists, moved to ${dest}.old"
     fi
     
     # link the file to the destination
-    ln -sf "$file" "$dest"
+    [[ ${USE_SUDO:-0} -eq 1 ]] && sudo ln -sf "$file" "$dest" || ln -sf "$file" "$dest"
 }
 
 run_root_script()
@@ -335,9 +335,9 @@ cmd_link() {
 
         # link dotfiles
         if [[ "$LINK_DOTFILES" -eq 1 && -f "./links" ]]; then
-            for line in "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"; do
-                dotfile="$(cut -d':' -f1 <<< $line | sed -e 's/ *$//g')"
-                dest="$(cut -d':' -f2 <<< $line | sed -e 's/ *$//g' | envsubst)"
+            while read -r line; do 
+                dotfile="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
+                dest="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1' | envsubst)"
                 
                 # check if we have write permissions on the destination directory
                 if [[ ! -w "$(dirname $dest)" ]]; then
@@ -349,11 +349,11 @@ cmd_link() {
                         continue
                     fi
 
-                    sudo link_file "$dotfile" "$dest"
+                    USE_SUDO=1 link_file "$PWD/.dotfiles/$dotfile" "$dest"
                 else
-                    link_file "$dotfile" "$dest"
+                    link_file "$PWD/.dotfiles/$dotfile" "$dest"
                 fi
-            done
+            done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
             log_info "dotfiles links updated"
         fi
 
