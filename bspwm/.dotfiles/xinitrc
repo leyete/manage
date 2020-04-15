@@ -14,24 +14,24 @@ sysresources=/etc/X11/xinit/.Xresources
 # Xmodmap
 sysmodmap=/etc/X11/xinit/.Xmodmap
 
-# xinitrc.d directory
-xinitrcd=/etc/X11/xinit/xinitrc.d/
+# xprofile
+xprofile=$HOME/.config/.xprofile
 
 # ------------------------------------------------------------------------------
 #   SETUP
 # ------------------------------------------------------------------------------
 
 # merge Xresources
-[ -f $sysresources ] && xrdb -merge $sysresources
-[ -f $userresources ] && xrdb -merge $userresources
+[ -f "$sysresources" ] && xrdb -merge "$sysresources"
+[ -f "$userresources" ] && xrdb -merge "$userresources"
 
-[ -f $sysmodmap ] && xmodmap $sysmodmap
+[ -f "$sysmodmap" ] && xmodmap "$sysmodmap"
 
 # add custom user font path
 xset -fp $HOME/.local/share/fonts/
 
-if [ -d $xinitrcd ]; then
-    for f in $xinitrcd/?*.sh; do
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+    for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
         [ -x "$f" ] && . "$f"
     done
     unset f
@@ -42,7 +42,7 @@ fi
 # ------------------------------------------------------------------------------
 
 # souce xprofile
-[ -f $HOME/.config/.xprofile ] && . $HOME/.config/.xprofile
+[ -f "$xprofile" ] && . "$xprofile"
 
 # start window manager (bspwm)
 exec /usr/bin/bspwm
