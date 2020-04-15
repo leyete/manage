@@ -11,29 +11,18 @@ cp .dotfiles/config.h source/config.h
 
 cd source
 
-# download patches
+# download patches and apply the patches
 suckless_patch="https://st.suckless.org/patches"
 
 patches=(
-    "$suckless_patch/alpha/st-alpha-0.8.2.diff"  # change background opacity
+    "$suckless_patch/alpha/st-alpha-0.8.2.diff"                                      # change background opacity
     "$suckless_patch/bold-is-not-bright/st-bold-is-not-bright-20190127-3be4cf1.diff" # bold doesn't apply bright color
-    "$suckless_patch/scrollback/st-scrollback-0.8.2.diff"  # scrollback through terminal output
 )
 
-mkdir patches
-cd patches
-
 for p in "${patches[@]}"; do
-    curl -fSsLO "$p"
-done
-
-cd ..
-
-# apply patches
-for p in patches/*; do
-    patch -Np1 "$p"
+    curl -fSsL "$p" | patch -Np1
 done
 
 # compile and install
-make install PREFIX="$OLDPWD"
+make clean install PREFIX="$OLDPWD"
 cd ..
