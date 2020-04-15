@@ -10,3 +10,4 @@ bin/*
 !*/.dotfiles
 !*/links
 !.fonts/*
+!broled-gen/broled-gen.c
