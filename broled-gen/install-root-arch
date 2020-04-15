@@ -1,7 +1,0 @@
-#!/bin/bash -ex
-#
-# Arch Linux's installation script for the broled-gen tool
-# https://github.com/mattrbeam/manage/broled-gen/broled-gen.c
-
-# broled-gen depends on liblcms2
-pacman -Syu --noconfirm lcms2

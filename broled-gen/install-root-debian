@@ -1,7 +1,0 @@
-#!/bin/bash -ex
-#
-# Ubuntu's installation script for the broled-gen tool
-# https://github.com/mattrbeam/manage/broled-gen/broled-gen.c
-
-# broled-gen depends on liblcms2
-DEBIAN_FRONTEND=noninteractive apt-get -q -y install liblcms2-dev
