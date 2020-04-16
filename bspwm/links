@@ -1,4 +1,6 @@
 * : bspwm/bspwmrc : $HOME/.config/bspwm/bspwmrc
-* : sxhkdrc/sxhkdrc : $HOME/.config/sxhkdrc/sxhkdrc
+* : sxhkd/sxhkdrc : $HOME/.config/sxhkd/sxhkdrc
 * : bspwm/xorg/xprofile : $HOME/.config/.xprofile
+* : bspwm/picom.conf : $HOME/.config/picom/picom.conf
+
 karonte : bspwm/xorg/Xresources : $HOME/.config/.Xresources

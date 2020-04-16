@@ -18,7 +18,6 @@ export WINDOW_MANAGER="bspwm"
 # use st as the default terminal
 export TERMINAL="st"
 
-
 # ------------------------------------------------------------------------------
 # CLEAN UP HOME DIRECTORY
 # ------------------------------------------------------------------------------
@@ -28,7 +27,6 @@ export TERMINAL="st"
 [ -z ${XDG_DATA_HOME} ] && export XDG_DATA_HOME="$HOME/.local/share"
 
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-
 
 # ------------------------------------------------------------------------------
 # DIR COLORS AND LS ICONS
@@ -41,4 +39,9 @@ eval "$(dircolors $MANAGE_ROOT/.dotfiles/dircolors.256dark)"
 # ------------------------------------------------------------------------------
 
 # start a graphical server on tty1 if not already running
+# NOTE: there is currently a bug with the mesa 20.0.0 driver that causes visual
+# glitches in some applications (like firefox). This is a temporary workaround
+# until it gets fixed. We will use the i965 driver instead.
+# Bug tracker: https://gitlab.freedesktop.org/mesa/mesa/-/issues/2552
+export MESA_LOADER_DRIVER_OVERRIDE=i965
 [ "$(tty)" = "/dev/tty1" ] && ! ps -e | grep -qw Xorg && exec startx

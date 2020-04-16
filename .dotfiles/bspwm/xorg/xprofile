@@ -14,18 +14,13 @@ export TERMINAL=st
 #   KEYBOARD
 # ------------------------------------------------------------------------------
 
-# change the behaviour of the CAPS LOCK key:
-#
-# - when combined with another key, treat it as CTRL
-# - when short-pressed (300 ms), treat it as ESC
-
-setxkbmap -option ctrl:nocaps
+# set Super as Escape when pressed no longer than 300 ms
 
 [ "$(pgrep xcape | wc -l)" -gt 0 ] && killall xcape 2>/dev/null
-xcape -t 300 -e 'Control_L=Escape'
+xcape -t 300 -e 'Super_L=Escape'
 
 # set keyboard key repeat rate
-xset r rate 190 35
+xset r rate 200 35
 
 # ------------------------------------------------------------------------------
 #   STARTUP PROCESSES

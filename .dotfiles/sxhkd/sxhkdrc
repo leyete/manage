@@ -37,3 +37,4 @@ super + z
 # terminal emulator
 super + Return
         $TERMINAL
+

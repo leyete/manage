@@ -7,8 +7,9 @@
 #   AUTOSTART
 # ------------------------------------------------------------------------------
 
-# start the simple X hotkey daemon to manage bspwm keybindings
-sxhkd &
+sxhkd &  # start the simple X hotkey daemon to manage bspwm keybindings
+picom &  # start compositor
+nitrogen --restore &  # set the background image
 
 # ------------------------------------------------------------------------------
 #   MONITORS
@@ -53,4 +54,3 @@ bspc config urgent_border_color   "#dd2727"
 #   RULES
 # ------------------------------------------------------------------------------
 
-bspc rule -a brave desktop='^2'

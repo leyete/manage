@@ -13,6 +13,7 @@ sysresources=/etc/X11/xinit/.Xresources
 
 # Xmodmap
 sysmodmap=/etc/X11/xinit/.Xmodmap
+usermodmap=$HOME/.config/.Xmodmap
 
 # xprofile
 xprofile=$HOME/.config/.xprofile
@@ -25,7 +26,9 @@ xprofile=$HOME/.config/.xprofile
 [ -f "$sysresources" ] && xrdb -merge "$sysresources"
 [ -f "$userresources" ] && xrdb -merge "$userresources"
 
+# set keyboard mappings
 [ -f "$sysmodmap" ] && xmodmap "$sysmodmap"
+[ -f "$usermodmap" ] && xmodmap "$usermodmap"
 
 # add custom user font path
 xset -fp $HOME/.local/share/fonts/
