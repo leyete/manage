@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 #
 # Debian's root install script for Python
 # https://www.python.org
