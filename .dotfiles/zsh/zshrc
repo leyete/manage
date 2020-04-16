@@ -24,6 +24,9 @@ plugins=(
 
 source "$ZSH/oh-my-zsh.sh"
 
+# source our prompt
+[[ -f "$HOME/.config/zsh/prompt.zsh" ]] && source "$HOME/.config/zsh/prompt.zsh"
+
 # a bit of autocompletion and ls colors
 
 zstyle  ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
