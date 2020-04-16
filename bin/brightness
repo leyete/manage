@@ -1,0 +1,125 @@
+#!/bin/bash
+#
+# brightness - simple brightness control script.
+#
+# This script uses xrandr to manage the screen brightness on my OLED laptop monitor
+# by using color correction.
+set -eu -o pipefail
+
+# ------------------------------------------------------------------------------
+#    HELPER FUNCTIONS (can be used by other functions)
+# ------------------------------------------------------------------------------
+
+check_value() {
+    declare level="$1"
+
+    [[ "$(grep -oE '^[0-9]\.[0-9]{1,2}$' <<< $level | wc -l)" -gt 0 ]]
+}
+
+get_raw_level() {
+    echo "$(xrandr --verbose | grep "$MONITOR" -A 100 | grep -oE '^\s*Brightness: [0-9]\.[0-9]+$' \
+	    | head -n1 | cut -d':' -f2 | awk '{$1=$1};1')"
+}
+
+set_raw_level() {
+    xrandr --output "$MONITOR" --brightness "$1"
+}
+
+# ------------------------------------------------------------------------------
+#    ACTIONS
+# ------------------------------------------------------------------------------
+
+get_level() {
+    echo "$MONITOR: $(get_raw_level)"
+}
+
+set_level() {
+    declare level="$1"
+
+    check_value "$level" || (echo "brightness level must be a number between 0.00-1.00"; exit 1)
+
+    set_raw_level "$level"
+}
+
+increment_level() {
+    declare increment="$1"
+
+    check_value "$increment" || (echo "increment level must be a number between 0.00-1.00"; exit 1)
+
+    # get the current brightness level (make sure it has two decimal figures)
+    current="$(printf "%0.2f" $(get_raw_level))"
+
+    # make sure the increment has two decimal figures
+    increment="$(printf "%0.2f" $increment)"
+
+    # multiply by 100 and sum the numbers
+    increment="${increment%.*}${increment#*.}"
+    current="${current%.*}${current#*.}"
+    sum="$(printf "%03d" $(expr  $current + $increment))"
+
+    [[ $((10#$sum)) -ge 100 ]] && set_raw_level "1.00" || set_raw_level "0.${sum:1:2}"
+}
+
+decrement_level() {
+    declare decrement="$1"
+
+    check_value "$decrement" || (echo "decrement level must be a number between 0.00-1.00"; exit 1)
+
+    # get the current brightness level (make sure it has two decimal figures)
+    current="$(printf "%0.2f" $(get_raw_level))"
+
+    # make sure the decrement has two decimal figures
+    decrement="$(printf "%0.2f" $decrement)"
+
+    # multiply by 100 and subtract the numbers
+    decrement="${decrement%.*}${decrement#*.}"
+    current="${current%.*}${current#*.}"
+    res="$(printf "%03d" $(expr  $current - $decrement))"
+
+    [[ $((10#$res)) -le 0 ]] && set_raw_level "0.00" || set_raw_level "${res:0:1}.${res:1:2}"
+}
+
+
+# ------------------------------------------------------------------------------
+#    MAIN ~ brightness
+# ------------------------------------------------------------------------------
+
+# you can get this with xrandr
+MONITOR="eDP-1"
+
+usage() {
+    cat <<EOF
+usage: $0 [-D <display>] ( -i <increase> | -d <decrease> | -s <value> | -g )
+
+Simple brightness control script: increse, decrease, set or get the current display brightness.
+
+Options:
+    -D <display>    use this display instead of the default one ($MONITOR).
+    -i <increase>   increase the brightness level by <increase> (must be a value between 0.00-1.00).
+    -d <decrease>   decrease the brightness level by <decrease> (must be a value between 0.00-1.00).
+    -s <value>      set the current brightness level (must be value a value between 0.00-1.00).
+    -g              get the current brightness level (value from 0.00-1.00).
+
+EOF
+}
+
+[[ $# -eq 0 ]] && (usage; exit)
+
+while getopts ":D:i:d:s:g" op; do
+    case "$op" in
+        D)
+	    MONITOR="$OPTARG" ;;
+	g)
+	    get_level; exit ;;
+        s)
+            set_level "$OPTARG"; exit ;;
+        i)
+            increment_level "$OPTARG"; exit ;;
+        d)
+            decrement_level "$OPTARG"; exit ;;
+        :)
+            echo "ERROR: option '-$OPTARG' requires an argument"; usage; exit 1 ;;
+	*)
+            echo "ERROR: invalid option '-$op'"; usage; exit 1
+    esac
+done

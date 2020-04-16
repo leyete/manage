@@ -1,6 +1,7 @@
 */*
 bin/*
 !bin/manage
+!bin/brightness
 !*/install
 !*/install-root-*
 !*/uninstall
