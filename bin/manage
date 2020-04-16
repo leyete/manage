@@ -177,14 +177,16 @@ cmd_install_usage() {
 usage: $(basename $0) [FLAGS] install [OPTIONS] [ENV ...]
 
 Install/reinstall the supplied environments. This script links the binaries and,
-optionally, the dotfiles as specified in the 'links' file.
+optionally, the dotfiles as specified in the 'links' file. Note that only links
+specified for the system '*' will be processed.
 
 OPTIONS:
     -a      Install all uninstalled environments (only applied if no environment
             is supplied).
     -r      If the environment is already installed, reinstall it. This option
             cleans out the environment directory before reinstalling.
-    -d      Link appropriate dotfiles (according to the 'links' file)
+    -d      Link appropriate dotfiles, according to the 'links' file, for the
+            system '*'.
 
 Execute $(basename $0) with no arguments to see available flags.
 
@@ -200,7 +202,7 @@ cmd_install() {
                 install_all=1
                 ;;
             d)
-                link_doftiles=1
+                link_dotfiles=1
                 ;;
             r)
                 reinstall=1
@@ -248,7 +250,7 @@ cmd_install() {
         run_script "install" "install.log"
 
         cd ..
-        LINK_DOTFILES=${link_dotfiles:-0} cmd_link -b $ENVIRONMENT
+        LINK_DOTFILES=${link_dotfiles:-0} cmd_link -m -b -o "$ENVIRONMENT"
     done
 }
 
@@ -263,22 +265,29 @@ usage: $(basename $0) [FLAGS] link [OPTIONS] [ENV ...]
 Link binaries and dotfiles for the supplied environments.
 
 OPTIONS:
-    -i      Apply links to all installed environments (only applied if no
-            environment is supplied). Unsets -a.
-    -a      Apply links to all environments (only applied if no environment is
-            supplied). Unsets -i.
-    -b      Link binaries (from 'bin' subdirectory)
-    -d      Link dotfiles (according to 'links' file)
+    -i          Apply links to all installed environments (only applied if no
+                environment is supplied). Unsets -a.
+    -a          Apply links to all environments (only applied if no environment is
+                supplied). Unsets -i.
+    -b          Link binaries (from 'bin' subdirectory)
+    -d          Link dotfiles (according to 'links' file)
+    -m          Create parent directories
+    -s <sys>    Link files specified for the supplied <sys> (default: *)
+    -o          Link only files for the specifed system (-s option)
 
 Execute $(basename $0) with no arguments to see available flags.
 
 EOF
 }
 
-cmd_link() {
-    local OPTIND op environment_list link_all link_installed
+extract_and_strip() {
+    printf 
+}
 
-    while getopts ":dbia" op; do
+cmd_link() {
+    local OPTIND op environment_list link_all link_installed host sys dot dest link_mkdir link_host_only
+
+    while getopts ":dbiams:o" op; do
         case "$op" in
             i)
                 link_installed=1
@@ -294,10 +303,17 @@ cmd_link() {
             b)
                 LINK_BINARIES=1
                 ;;
+            m)
+                link_mkdir=1
+		;;
+	    o)
+	        link_host_only=1
+		;;
+	    :)
+		ENVIRONMENT="link" log_error "option (-$OPTARG) expects one argument"; cmd_link_usage; exit 1
+		;;
             *)
-                ENVIRONMENT="link" log_error "invalid option ($op)"
-                cmd_link_usage
-                exit 1
+                ENVIRONMENT="link" log_error "invalid option ($op)"; cmd_link_usage; exit 1
                 ;;
         esac
     done
@@ -307,6 +323,8 @@ cmd_link() {
     LINK_BINARIES=${LINK_BINARIES:-0}
     link_all=${link_all:-0}
     link_installed=${link_installed:-0}
+    link_mkdir=${link_mkdir:-0}
+    link_host_only=${link_host_only:-0}
 
     # if there is nothing to link, do nothing
     if [[ "$LINK_BINARIES" -eq 0 && "$LINK_DOTFILES" -eq 0 ]]; then
@@ -338,24 +356,32 @@ cmd_link() {
         # link dotfiles
         if [[ "$LINK_DOTFILES" -eq 1 && -f "./links" ]]; then
             while read -r line; do 
-                dotfile="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
-                dest="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1' | envsubst)"
-                
-                # check if we have write permissions on the destination directory
-                if [[ ! -w "$(dirname $dest)" ]]; then
-                    # are we allowed to run sudo?
-                    if [[ "$ALLOW_SUDO" -ne 1 ]]; then
-                        log_warn "'$dotfile' is ment to be linked to '$dest', but you" \
-                            "don't have write permission. consider using the '-s' FLAG" \
-                            "to link it as sudo"
-                        continue
-                    fi
+		host="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
+	        dot="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1')"
+		dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
 
-                    USE_SUDO=1 link_file "$PWD/.dotfiles/$dotfile" "$dest"
-                else
-                    link_file "$PWD/.dotfiles/$dotfile" "$dest"
-                fi
-            done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
+		# skip unwanted entries
+		[[ "$link_host_only" -eq 1 && "$(hostname)" != "$host" ]] && continue
+		[[ "$host" != "*" && "$(hostname)" != "$host" ]] && continue
+		
+		# create parent directories
+		[[ "$link_mkdir" -eq 1 ]] && (mkdir -p $(dirname $dest) 2>/dev/null || true)
+
+		# check if we have write permissions on the destination directory
+		if [[ ! -w "$(dirname $dest)" ]]; then
+		    # are we allowed to run sudo?
+		    if [[ "$ALLOW_SUDO" -ne 1 ]]; then
+			log_warn "'$dot' is ment to be linked to '$dest', but you" \
+			    "don't have write permission. consider using the '-s' FLAG" \
+			    "to link it as sudo"
+			continue
+		    fi
+
+		    USE_SUDO=1 link_file "$OLDPWD/.dotfiles/$dot" "$dest"
+		else
+		    link_file "$OLDPWD/.dotfiles/$dot" "$dest"
+		fi
+	    done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
             log_info "dotfiles links updated"
         fi
 
@@ -419,6 +445,8 @@ cmd_uninstall() {
         # run regular uninstall script
         run_script "uninstall" "uninstall.log"
 
+	# TODO: remove symbolic links
+
         # clean the environment directory
         clean_this
 
@@ -470,7 +498,7 @@ cmd_list() {
     uninstalled=${uninstalled:-0}
 
     for e in *; do
-        [[ "$(find $e -name 'install*' -o -name '.dotfiles' 2>/dev/null | wc -l)" -eq 0 ]] && continue
+        [[ "$(find $e -name 'install*' -o -name 'links' 2>/dev/null | wc -l)" -eq 0 ]] && continue
 
         if is_env_installed "$e"; then
             [[ "$installed" -eq 1 ]] && echo "$e"
@@ -543,8 +571,10 @@ if [[ -z "$COMMAND" ]]; then
     exit 1
 fi
 
+cd $MANAGE_ROOT
+
 case "$COMMAND" in
-    install|link|uninstall)
+    install|link|uninstall|list)
         [[ "$SHOW_HELP" -eq 1 ]] && cmd_${COMMAND}_usage || cmd_${COMMAND} "$@"
         ;;
     *)

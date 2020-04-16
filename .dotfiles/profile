@@ -1,0 +1,44 @@
+# vim:ft=sh ts=2 sw=2 sts=2 et fenc=utf-8
+#
+# Profile file, run on login.
+
+# change this with the location of the mange repo
+export MANAGE_ROOT="$HOME/manage"
+
+# add manage/bin to the PATH
+export PATH="$MANAGE_ROOT/bin:$PATH"
+
+# ------------------------------------------------------------------------------
+# SESSION CUSTOMIZATION
+# ------------------------------------------------------------------------------
+
+# execute bspwm from .xinitrc
+export WINDOW_MANAGER="bspwm"
+
+# use st as the default terminal
+export TERMINAL="st"
+
+
+# ------------------------------------------------------------------------------
+# CLEAN UP HOME DIRECTORY
+# ------------------------------------------------------------------------------
+
+# locate every possible configuration under XDG_CONFIG_HOME
+[ -z ${XDG_CONFIG_HOME} ] && export XDG_CONFIG_HOME="$HOME/.config"
+[ -z ${XDG_DATA_HOME} ] && export XDG_DATA_HOME="$HOME/.local/share"
+
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+
+# ------------------------------------------------------------------------------
+# DIR COLORS AND LS ICONS
+# ------------------------------------------------------------------------------
+
+eval "$(dircolors $MANAGE_ROOT/.dotfiles/dircolors.256dark)"
+
+# ------------------------------------------------------------------------------
+# LAST CONFIGS
+# ------------------------------------------------------------------------------
+
+# start a graphical server on tty1 if not already running
+[ "$(tty)" = "/dev/tty1" ] && ! ps -e | grep -qw Xorg && exec startx

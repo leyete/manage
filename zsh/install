@@ -1,0 +1,35 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for my ZSH environment
+# https://www.zsh.org
+# https://ohmyz.sh
+
+set -eu -o pipefail
+
+install_oh_my_zsh() {
+    # download the install script
+    if type curl >/dev/null 2>&1; then
+        curl -fsSLO 'https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh'
+    elif type wget >/dev/null 2>&1; then
+        wget -qO install.sh 'https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/tools/install.sh'
+    else
+        echo "ERROR: either curl or wget are required to download oh-my-zsh install script"
+	exit 1
+    fi
+
+    ZSH="$PWD/oh-my-zsh" /bin/sh install.sh --unattended --keep-zshrc
+
+    # clean up
+    rm -f install.sh
+    rm -f ~/.zshrc  # we don't want the template
+}
+
+install_powerlevel10k() {
+    git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' "$PWD/oh-my-zsh/custom/themes/powerlevel10k"
+}
+
+
+# install oh-my-zsh and powerlevel10k
+
+install_oh_my_zsh
+install_powerlevel10k

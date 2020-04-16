@@ -7,7 +7,7 @@
 git clone https://git.suckless.org/st source
 
 # copy our configuration header file
-cp .dotfiles/config.h source/config.h
+cp .data/config.h source/config.h
 
 cd source
 

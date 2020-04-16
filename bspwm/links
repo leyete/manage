@@ -1,5 +1,4 @@
-bspwmrc : $HOME/.config/bspwm/bspwmrc
-sxhkdrc : $HOME/.config/sxhkdrc/sxhkdrc
-xinitrc : $HOME/.xinitrc
-xprofile : $HOME/.config/.xprofile
-Xresources : $HOME/.config/.Xresources
+* : bspwm/bspwmrc : $HOME/.config/bspwm/bspwmrc
+* : sxhkdrc/sxhkdrc : $HOME/.config/sxhkdrc/sxhkdrc
+* : bspwm/xorg/xprofile : $HOME/.config/.xprofile
+karonte : bspwm/xorg/Xresources : $HOME/.config/.Xresources

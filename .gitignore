@@ -1,14 +1,25 @@
+# ignore everything from default, we will exclude some things later
 */*
 bin/*
+
+# include these scripts/programs
 !bin/manage
 !bin/brightness
+
+# fonts and dotfiles
+!.fonts/*
+!.dotfiles/*
+
+# install/uninstall/upgrade scripts
 !*/install
 !*/install-root-*
 !*/uninstall
 !*/uninstall-root-*
 !*/upgrade
 !*/upgrade-root-*
-!*/.dotfiles
+
+# link specs
 !*/links
-!.fonts/*
-!broled-gen/broled-gen.c
+
+# environment-specific data (soruce files mostly)
+!*/.data

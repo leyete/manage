@@ -44,5 +44,5 @@ fi
 # souce xprofile
 [ -f "$xprofile" ] && . "$xprofile"
 
-# start window manager (bspwm)
-exec /usr/bin/bspwm
+# WINDOW_MANAGER must be set from the xprofile (this allows more configurations)
+exec $WINDOW_MANAGER
