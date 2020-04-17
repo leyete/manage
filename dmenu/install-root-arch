@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for dmenu
+# https://tools.suckless.org/dmenu/
+
+pacman -Syu --noconfirm dmenu
