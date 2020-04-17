@@ -15,8 +15,8 @@ export PATH="$MANAGE_ROOT/bin:$PATH"
 # execute bspwm from .xinitrc
 export WINDOW_MANAGER="bspwm"
 
-# use st as the default terminal
 export TERMINAL="st"
+export EDITOR="nvim"
 
 # ------------------------------------------------------------------------------
 # CLEAN UP HOME DIRECTORY
