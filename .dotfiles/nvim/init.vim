@@ -349,3 +349,4 @@ function! HasPaste()
 endfunction
 
 " }}}
+

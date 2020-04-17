@@ -1,8 +1,1 @@
-# Link paths for Neovim dotfiles
-
-init.vim : ~/.config/nvim/init.vim
-cacacak
-
-australopithecus
-  australopithecus
-  # australopithecus
+* : nvim/init.vim : $HOME/.config/nvim/init.vim
