@@ -14,10 +14,15 @@ export TERMINAL=st
 #   KEYBOARD
 # ------------------------------------------------------------------------------
 
-# set Super as Escape when pressed no longer than 300 ms
+# Remap Caps Lock:
+#
+# - To Left Control if combined with other keys
+# - To Escape if pressed no longer than 300 ms
+
+setxkbmap -option ctrl:nocaps
 
 [ "$(pgrep xcape | wc -l)" -gt 0 ] && killall xcape 2>/dev/null
-xcape -t 300 -e 'Super_L=Escape'
+xcape -t 300 -e 'Control_L=Escape'
 
 # set keyboard key repeat rate
 xset r rate 200 35

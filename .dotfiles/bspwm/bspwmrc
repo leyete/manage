@@ -10,9 +10,11 @@
 sxhkd &  # start the simple X hotkey daemon to manage bspwm keybindings
 picom &  # start compositor
 nitrogen --restore &  # set the background image
+$HOME/.config/polybar/launch.sh top & # launch polybar
+brightness -s 0.5  & # set the screen brightness
 
 # ------------------------------------------------------------------------------
-#   MONITORS
+#   MONITORS AND WORKSPACES
 # ------------------------------------------------------------------------------
 
 bspc monitor eDP-1 -d 1 2 3 4 5
@@ -22,8 +24,8 @@ bspc monitor eDP-1 -d 1 2 3 4 5
 # ------------------------------------------------------------------------------
 
 bspc config border_width                    2      # window border width
-bspc config window_gap                      10     # gap that separates windows
-bspc config top_padding                     20     # gap from the top frame
+bspc config window_gap                      7      # gap that separates windows
+bspc config top_padding                     30     # gap from the top frame
 bspc config bottom_padding                  0      # gap form the bottom frame
 bspc config left_padding                    0      # gap form the left frame
 bspc config right_padding                   0      # gap from the right padding
@@ -48,7 +50,6 @@ bspc config normal_border_color   "#4c566a"
 bspc config active_border_color   "#1e1e1e"
 bspc config focused_border_color  "#5e81ac"
 bspc config presel_feedback_color "#5e81ac"
-bspc config urgent_border_color   "#dd2727"
 
 # ------------------------------------------------------------------------------
 #   RULES
