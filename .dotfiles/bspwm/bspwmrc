@@ -17,7 +17,9 @@ brightness -s 0.5  & # set the screen brightness
 #   MONITORS AND WORKSPACES
 # ------------------------------------------------------------------------------
 
-bspc monitor eDP-1 -d 1 2 3 4 5
+bspc monitor eDP-1 -d 1 2 3 4 5 6
+bspc monitor DP-4 -d 1 2 3 4 5 6
+bspc monitor DP-0 -d 1 2 3 4 5 6
 
 # ------------------------------------------------------------------------------
 #   CONFIG

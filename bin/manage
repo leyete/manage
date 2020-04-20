@@ -361,9 +361,9 @@ cmd_link() {
 		dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
 
 		# skip unwanted entries
-		[[ "$link_host_only" -eq 1 && "$(hostname)" != "$host" ]] && continue
-		[[ "$host" != "*" && "$(hostname)" != "$host" ]] && continue
-		
+		[[ "$link_host_only" -eq 1 && "$(cat /etc/hostname)" != "$host" ]] && continue
+		[[ "$host" != "*" && "$(cat /etc/hostname)" != "$host" ]] && continue
+
 		# create parent directories
 		[[ "$link_mkdir" -eq 1 ]] && (mkdir -p $(dirname $dest) 2>/dev/null || true)
 

@@ -2,3 +2,5 @@
 * : zsh/zshrc : $HOME/.config/zsh/.zshrc
 
 karonte : zsh/prompt-main.zsh : $HOME/.config/zsh/prompt.zsh
+
+kraber : zsh/prompt-main.zsh : $HOME/.config/zsh/prompt.zsh

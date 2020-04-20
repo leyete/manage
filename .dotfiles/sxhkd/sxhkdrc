@@ -123,9 +123,13 @@ super + shift + {Up,Down}
         brightness -{i,d} 0.1
 
 # ------------------------------------------------------------------------------
-#   DMENU KEYBINDINGS (super + alt + key)
+#   DMENU KEYBINDINGS (super + shift + control + key)
 # ------------------------------------------------------------------------------
 
 # edit common dotfiles
-super + shift + ctrl + d
-        $HOME/.local/bin/dmenu-edit-conf.sh
+super + shift + ctrl + z
+	dmenuedit
+
+# run programs
+super + shift + ctrl + x
+	dmenu_run

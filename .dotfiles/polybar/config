@@ -6,10 +6,52 @@
 [global/wm]
 ; Host-specific config, must be liked to $HOME/.config/polybar/
 include-file = $HOME/.config/polybar/host-config
-include-file = $HOME/.config/polybar/colors
 
 margin-bottom = ${config.margin-bottom}
 margin-top = ${config.margin-top}
+ 
+; Color palette for the Polybar launch bar. Based on the Nord theme:
+; https://www.nordtheme.com
+
+[nord]
+; Polar Night
+nord0 = #2E3440
+nord1 = #3B4252
+nord2 = #434C5E
+nord3 = #4C566A
+
+; Snow Storm
+nord4 = #D8DEE9
+nord5 = #E5E9F0
+nord6 = #ECEFF4
+
+; Frost
+nord7 = #8FBCBB
+nord8 = #88C0D0
+nord9 = #81A1C1
+nord10 = #5E81AC
+
+; Aurora
+nord11 = #BF616A
+nord12 = #D08770
+nord13 = #EBCB8B
+nord14 = #A3BE8C
+nord15 = #B48EAD
+
+[colors]
+background = ${nord.nord0}
+foreground = ${nord.nord4}
+
+off = ${nord.nord3}
+highlight1 = ${nord.nord8}
+highlight2 = ${nord.nord10}
+
+notify = ${nord.nord8}
+error = ${nord.nord11}
+urgent = ${nord.nord12}
+warning = ${nord.nord13}
+success = ${nord.nord14}
+progress = ${nord.nord15}
 
 ; ==============================================================================
 ;   TOP BAR
@@ -42,9 +84,9 @@ font-0 = Inconsolata Nerd Font:pixelsize=17:style=Regular;1
 font-1 = Inconsolata Nerd Font:pixelsize=17:style=Medium;1
 font-2 = Inconsolata Nerd Font:pixelsize=17:style=Bold;1
 
-modules-left = bspwm
+modules-left = ${config.top-left}
 modules-center =
-modules-right = hackthebox wireless-network battery
+modules-right = ${config.top-right}
 
 cursor-click = pointer
 cursor-scroll = ns-resize

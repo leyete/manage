@@ -36,4 +36,4 @@ case "$choice" in
     *) exit 1 ;;
 esac
 
-st -e $EDITOR "$dotfile"
+$TERMINAL -e $EDITOR "$dotfile"

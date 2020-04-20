@@ -3,19 +3,22 @@
 # Installation script for the suckless terminal (st)
 # https://st.suckless.org
 
+VERSION=0.8.2
+
 # get the source code from the git repo
 git clone https://git.suckless.org/st source
 
-# copy our configuration header file
-cp .data/config.h source/config.h
-
 cd source
+git checkout "$VERSION"
+
+# copy our configuration header file
+cp ../.data/config.h config.h
 
 # download patches and apply the patches
 suckless_patch="https://st.suckless.org/patches"
 
 patches=(
-    "$suckless_patch/alpha/st-alpha-0.8.2.diff"                                      # change background opacity
+    "$suckless_patch/alpha/st-alpha-${VERSION}.diff"                                      # change background opacity
     "$suckless_patch/bold-is-not-bright/st-bold-is-not-bright-20190127-3be4cf1.diff" # bold doesn't apply bright color
 )
 
