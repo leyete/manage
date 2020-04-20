@@ -1,0 +1,6 @@
+* : polybar/launch.sh : $HOME/.config/polybar/launch.sh
+* : polybar/scripts : $HOME/.config/polybar/scripts
+
+karonte : polybar/colors/nord : $HOME/.config/polybar/colors
+karonte : polybar/config/karonte : $HOME/.config/polybar/host-config
+karonte : polybar/bars/nord : $HOME/.config/polybar/config

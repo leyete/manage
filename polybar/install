@@ -1,0 +1,30 @@
+#!/bin/bash -ex
+#
+# Installation script for Polybar
+# https://github.com/polybar/polybar
+
+set -eu -o pipefail
+
+find_latest_polybar_version() {
+    git ls-remote --tags git://github.com/polybar/polybar.git \
+    | grep -oh '[0-9]\{1,2\}\.[0-9]\{1,2\}\.[0-9]\{1,2\}' \
+    | sort --version-sort -r \
+    | head -n 1
+}
+
+
+VERSION="$(find_latest_polybar_version)"
+curl -fsSLO "https://github.com/polybar/polybar/releases/download/${VERSION}/polybar-${VERSION}.tar"
+
+tar xvf "polybar-${VERSION}.tar"
+cd polybar
+
+mkdir build
+cd build
+cmake ..
+make -j$(nproc)
+
+cd ../..
+
+# clean up a bit
+rm -f polybar "polybar-${VERSION}.tar"
