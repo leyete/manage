@@ -80,9 +80,9 @@ module-margin = 1
 
 override-redirect = false
 
-font-0 = Inconsolata Nerd Font:pixelsize=17:style=Regular;1
-font-1 = Inconsolata Nerd Font:pixelsize=17:style=Medium;1
-font-2 = Inconsolata Nerd Font:pixelsize=17:style=Bold;1
+font-0 = Inconsolata Nerd Font:pixelsize=12:style=Regular;1
+font-1 = Inconsolata Nerd Font:pixelsize=12:style=Medium;1
+font-2 = Inconsolata Nerd Font:pixelsize=12:style=Bold;1
 
 modules-left = ${config.top-left}
 modules-center =
@@ -222,3 +222,18 @@ exec = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -i hackthebox -s
 click-left = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -i hackthebox -x
 click-right = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -c
 
+[module/date]
+type = internal/date
+
+date = %Y/%m/%d%
+time = %H:%M
+
+date-alt = %A, %d %B %Y
+time-alt = %H:%M:%S
+
+format = <label>
+format-background = ${colors.background}
+format-foreground = ${colors.foreground}
+
+label = %date% %time%
+label-foreground = ${colors.foreground}

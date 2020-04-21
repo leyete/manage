@@ -24,7 +24,10 @@ cd build
 cmake ..
 make -j$(nproc)
 
+mkdir ../../bin
+mv bin/polybar ../../bin/polybar
+mv bin/polybar-msg ../../bin/polybar-msg
 cd ../..
 
 # clean up a bit
-rm -f polybar "polybar-${VERSION}.tar"
+rm -rf polybar "polybar-${VERSION}.tar"
