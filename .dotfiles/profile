@@ -14,7 +14,7 @@ export PATH="$MANAGE_ROOT/bin:$PATH"
 
 export EDITOR="nvim"
 
-export LC_CTYPE=en_US.UTF-8
+[ -x "$MANAGE_ROOT/bin/dmenupass" ] && export SUDO_ASKPASS="$MANAGE_ROOT/bin/dmenupass"
 
 # ------------------------------------------------------------------------------
 # CLEAN UP HOME DIRECTORY

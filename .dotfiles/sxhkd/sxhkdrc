@@ -72,6 +72,10 @@ super + {o,i}
 super + {_, shift + }{1-9,0}
         bspc {desktop -f,node -d} focused:'^{1-9,10}'
 
+# focus or send to the given monitor
+super + ctrl + {_, alt +}{1-2}
+        bspc {monitor -f,node -m} '^{1-2}'
+
 # MOVE/RESIZE
 
 # expand a window by moving one of its side outward
@@ -122,6 +126,14 @@ super + alt + f
 super + shift + {Up,Down}
         brightness -{i,d} 0.1
 
+# Telegram Desktop
+super + alt + t
+        telegram-desktop
+
+# Discord
+super + alt + d
+        discord
+
 # ------------------------------------------------------------------------------
 #   DMENU KEYBINDINGS (super + shift + control + key)
 # ------------------------------------------------------------------------------
@@ -133,3 +145,7 @@ super + shift + ctrl + z
 # run programs
 super + shift + ctrl + x
 	dmenu_run
+
+# shutdown/reboot
+super + shift + {p,bracketleft}
+    sudo -A shutdown -{P,r} now

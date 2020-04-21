@@ -8,10 +8,7 @@
 # ------------------------------------------------------------------------------
 
 sxhkd &  # start the simple X hotkey daemon to manage bspwm keybindings
-picom &  # start compositor
-nitrogen --restore &  # set the background image
 $HOME/.config/polybar/launch.sh top & # launch polybar
-brightness -s 0.5  & # set the screen brightness
 
 # ------------------------------------------------------------------------------
 #   MONITORS AND WORKSPACES
@@ -57,3 +54,6 @@ bspc config presel_feedback_color "#5e81ac"
 #   RULES
 # ------------------------------------------------------------------------------
 
+bspc rule -a firefox desktop=^2
+bspc rule -a TelegramDesktop desktop=^5
+bspc rule -a discord desktop=^5
