@@ -35,8 +35,15 @@ xset r rate 200 35
 xrandr --output 'DP-4' --primary
 xrandr --output 'DP-4' --mode 2560x1440 --rate 144.00
 
-# set my secondary display
-xrandr --auto --output 'DP-0' --mode 1920x1080 --left-of 'DP-4'
+# set the secondary monitor
+xrandr --auto --output 'DP-0' --mode 1920x1080 --left-of DP-4
+
+# ------------------------------------------------------------------------------
+#   X CURSOR
+# ------------------------------------------------------------------------------
+
+# change X shaped default cursor
+xsetroot -cursor_name left_ptr &
 
 # ------------------------------------------------------------------------------
 #   STARTUP PROCESSES

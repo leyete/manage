@@ -1,0 +1,12 @@
+! Xft settings -----------------------------------------------------------------
+Xft.autohint:   true
+Xft.dpi:        96
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.lcdfilter:  lcddefault
+
+
+! Xcursor settings -----------------------------------------------------------------
+Xcursor.size: 16
