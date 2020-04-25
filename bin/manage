@@ -330,8 +330,11 @@ cmd_link() {
 
                 # create parent directories
                 [[ "${op_mkdir:-0}" -eq 1 ]] && mkdir -p $(dirname $dest) 2>/dev/null || true
-                [[ ! -d "$destdir" ]] && \
-                    (log_error "missing parent directory ($destdir) consider using -m"; continue)
+                
+                if [[ ! -d "$destdir" ]]; then
+                    log_error "missing parent directory ($destdir) consider using -m"
+                    continue
+                fi
 
                 # check if we have write permission on the destination directory
                 if [[ ! -w "$destdir" ]]; then
