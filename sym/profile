@@ -1,0 +1,45 @@
+# vim:ft=sh ts=2 sw=2 sts=2 et fenc=utf-8
+#
+# Profile file, run on login.
+
+# change this with the location of the mange repo
+export DTMGR_HOME="$HOME/DTmanage"
+
+# add DTmanage/bin to the PATH
+export PATH="$DTMGR_HOME/bin:$PATH"
+
+# ------------------------------------------------------------------------------
+# SESSION CUSTOMIZATION
+# ------------------------------------------------------------------------------
+
+export EDITOR="nvim"
+
+[ -x "$DTMGR_HOME/bin/dmenupass" ] && export SUDO_ASKPASS="$DTMGR_HOME/bin/dmenupass"
+
+# ------------------------------------------------------------------------------
+# CLEAN UP HOME DIRECTORY
+# ------------------------------------------------------------------------------
+
+# locate every possible configuration under XDG_CONFIG_HOME
+[ -z ${XDG_CONFIG_HOME} ] && export XDG_CONFIG_HOME="$HOME/.config"
+[ -z ${XDG_DATA_HOME} ] && export XDG_DATA_HOME="$HOME/.local/share"
+
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+# ------------------------------------------------------------------------------
+# DIR COLORS AND LS ICONS
+# ------------------------------------------------------------------------------
+
+eval "$(dircolors $DTMGR_HOME/sym/dircolors.256dark)"
+
+# ------------------------------------------------------------------------------
+# LAST CONFIGS
+# ------------------------------------------------------------------------------
+
+# start a graphical server on tty1 if not already running
+# NOTE: there is currently a bug with the mesa 20.0.0 driver that causes visual
+# glitches in some applications (like firefox). This is a temporary workaround
+# until it gets fixed. We will use the i965 driver instead.
+# Bug tracker: https://gitlab.freedesktop.org/mesa/mesa/-/issues/2552
+export MESA_LOADER_DRIVER_OVERRIDE=i965
+[ "$(tty)" = "/dev/tty1" ] && ! ps -e | grep -qw Xorg && exec startx
