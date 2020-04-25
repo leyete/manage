@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 #
-# Arch Linux's root installation script for my ZSH environment
+# Installation script for my ZSH environment
 # https://www.zsh.org
 # https://ohmyz.sh
 

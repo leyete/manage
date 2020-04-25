@@ -1,7 +1,0 @@
-#!/bin/bash -ex
-#
-# Arch Linux's root installation script for the suckless terminal
-# https://st.suckless.org
-
-# install X11 developer headers
-pacman -Syu --noconfirm libx11 libxft libxext

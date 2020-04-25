@@ -1,6 +1,4 @@
 * : profile : $HOME/.zprofile
-* : zsh/zshrc : $HOME/.config/zsh/.zshrc
+* : zsh/zshrc : $XDG_CONFIG_HOME/zsh/.zshrc
 
-karonte : zsh/prompt-main.zsh : $HOME/.config/zsh/prompt.zsh
-
-kraber : zsh/prompt-main.zsh : $HOME/.config/zsh/prompt.zsh
+cosmos : zsh/prompts/main.zsh : $XDG_CONFIG_HOME/zsh/prompt.zsh

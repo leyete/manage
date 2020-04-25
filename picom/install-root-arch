@@ -1,6 +1,0 @@
-#!/bin/bash -ex
-#
-# Arch Linux's root installation script for Picom
-# https://github.com/ysui/picom
-
-pacman -Syu --noconfirm picom

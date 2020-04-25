@@ -113,29 +113,6 @@ let g:go_fmt_command = "goimports"
 
 " }}}
 
-" {{{ DEOPLETE
-
-if has("nvim")
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  let g:deoplete#enable_at_startup = 1
-endif
-
-" }}}
-
-" {{{ GOCODE
-
-Plug 'stamblerre/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
-
-" }}}
-
-" {{{ DEOPLETE-GO
-
-if has("nvim")
-  Plug 'deoplete-plugins/deoplete-go', { 'do': 'make' }
-endif
-
-" }}}
-
 " {{{ VIM CODE DARK
 
 Plug 'tomasiser/vim-code-dark'

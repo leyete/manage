@@ -1,7 +1,0 @@
-* : polybar/launch.sh : $HOME/.config/polybar/launch.sh
-* : polybar/scripts : $HOME/.config/polybar/scripts
-* : polybar/config : $HOME/.config/polybar/config
-
-karonte : polybar/host-config/karonte : $HOME/.config/polybar/host-config
-
-kraber : polybar/host-config/kraber : $HOME/.config/polybar/host-config

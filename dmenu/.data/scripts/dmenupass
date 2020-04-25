@@ -1,5 +1,0 @@
-#!/bin/bash -e
-#
-# Askpass helper for password prompts using dmenu
-
-dmenu -P -p "$1" <&-

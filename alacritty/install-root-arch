@@ -1,7 +1,0 @@
-#!/bin/bash -ex
-#
-# Arch Linux's root installation script for Alacritty, the GPU-accelerated
-# terminal emulator.
-# https://github.com/alacritty/alacritty
-
-pacman -Syu --noconfirm alacritty

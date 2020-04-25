@@ -1,7 +1,0 @@
-#!/bin/bash -ex
-#
-# Debian's root installation script for the suckless terminal
-# https://st.suckless.org
-
-# install X11 developer headers
-DEBIAN_FRONTEND=noninteractive apt-get -q -y install libx11-dev libxft-dev libxext-dev

@@ -158,9 +158,9 @@ run_script()
 
     set +e
     if [[ "$VERBOSE_OUTPUT" -eq 1 ]]; then
-        DISTRI=$DISTRI PATH="$MANAGE_ROOT/bin/:$PATH" nice -n$NICE_LEVEL "./$script" 2>&1 | tee -a "$log_file"
+        DISTRI=$DISTRI PATH="$DTMGR_HOME/bin/:$PATH" nice -n$NICE_LEVEL "./$script" 2>&1 | tee -a "$log_file"
     else
-        DISTRI=$DISTRI PATH="$MANAGE_ROOT/bin/:$PATH" nice -n$NICE_LEVEL "./$script" >> "$log_file" 2>&1
+        DISTRI=$DISTRI PATH="$DTMGR_HOME/bin/:$PATH" nice -n$NICE_LEVEL "./$script" >> "$log_file" 2>&1
     fi
     script_failed=$?
     set -e
@@ -276,22 +276,23 @@ EOF
 cmd_link() {
     local OPTIND op op_sym op_bin op_mkdir op_host use_sudo
 
-    while getopts ":dbiams:o" op; do
+    while getopts ":sbmo" op; do
         case "$op" in
             s) op_sym=1 ;;
             b) op_bin=1 ;;
             m) op_mkdir=1 ;;
-	        o) op_host=1 ;;
-	        :)
-		        ENVIRONMENT="link" log_error "option (-$OPTARG) expects one argument"; cmd_link_usage; exit 1 ;;
+            o) op_host=1 ;;
+            :)
+                TARGET="link" log_error "option (-$OPTARG) expects one argument"; cmd_link_usage; exit 1 ;;
             *)
-                ENVIRONMENT="link" log_error "invalid option ($op)"; cmd_link_usage; exit 1 ;;
+                TARGET="link" log_error "invalid option ($op)"; cmd_link_usage; exit 1 ;;
         esac
     done
     shift $((OPTIND-1))
     
     op_sym=${op_sym:-0}
     op_bin=${op_bin:-0}
+    op_host=${op_host:-0}
 
     # if there is nothing to link, do nothing
     if [[ "$op_bin" -eq 0 && "$op_sym" -eq 0 ]]; then
@@ -312,7 +313,7 @@ cmd_link() {
             for b in $PWD/bin/*; do
                 link_file "$b" "$OLDPWD/bin/$(basename $b)"
             done
-            log_info "bin symlinks updated"
+            log_info "bin links updated"
         fi
 
         if [[ "$op_sym" -eq 1 && -f "./links" ]]; then
@@ -344,6 +345,7 @@ cmd_link() {
 
                 USE_SUDO=${use_sudo:-0} link_file "$OLDPWD/sym/$sym" "$dest"
             done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
+            log_info "sym links updated"
         fi
 
         cd ..
@@ -400,7 +402,6 @@ cmd_uninstall() {
                 dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
 
                 # skip unwanted entries
-                [[ "$op_host" -eq 1 && "$(cat /etc/hostname)" != "$host" ]] && continue
                 [[ "$host" != "*" && "$(cat /etc/hostname)" != "$host" ]] && continue
 
                 [[ "$(readlink $dest)" == "$OLDPWD/sym/$sym" ]] && (rm -f "$dest" || \
@@ -442,6 +443,7 @@ cmd_list() {
 
     while getopts ":siu" op; do
         case "$op" in
+            s) op_sym=1 ;;
             i) op_in=1 ;;
             u) op_un=1 ;;
             *) TARGET="list" log_error "invalid option ($op)"; cmd_list_usage; exit 1 ;;
@@ -454,9 +456,9 @@ cmd_list() {
     op_sym=${op_sym:-0}
 
     for t in *; do
-        if [[ "$op_sym" -eq 1 && "$(find $t -name 'links' 2>/dev/null | wc -l)" -gt 0 ]]; then
+        if [[ "$op_sym" -eq 1 && "$(find $t -type f -maxdepth 1 -name 'links' 2>/dev/null | wc -l)" -gt 0 ]]; then
             echo "$t"
-        elif [[ "$(find $f -name 'install*' 2>/dev/null | wc -l)" -gt 0 ]]; then
+        elif [[ "$(find $t -type f -maxdepth 1 -name 'install*' 2>/dev/null | wc -l)" -gt 0 ]]; then
             if is_tool_installed "$t"; then
                 [[ "$op_in" -eq 1 ]] && echo "$t"
             else
