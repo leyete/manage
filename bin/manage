@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
-# Script to manage and rice my Linux systems
-# https://github.com/mattrbeam/manage
+# Dotfiles and Tool Manager - Script to manage and rice my systems.
 
 set -eu -o pipefail
 
-MANAGE_ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
+export DTMGR_HOME="$(dirname "${BASH_SOURCE[@]}")/.."
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
 # ------------------------------------------------------------------------------
 #   LOG FUNCTIONS
@@ -15,7 +16,7 @@ manage_log() {
     local COLOR
 
     COLOR="$1";shift
-    printf "${COLOR}MANAGE | $ENVIRONMENT |$(tput sgr0 2>/dev/null) $*"
+    printf "${COLOR}MANAGE | $TARGET |$(tput sgr0 2>/dev/null) $*"
 }
 
 log_info() {
@@ -33,6 +34,12 @@ log_error() {
 log_fatal() {
     log_error "$@"
     exit 1
+}
+
+log_temp_file() {
+    local logfile="${1%.*}$(date +"%Y%m%d-%H-%M-%S").log"
+    cp "$1" "/tmp/$logfile" 2>/dev/null
+    echo "$logfile"
 }
 
 # ------------------------------------------------------------------------------
@@ -61,18 +68,18 @@ detect_distribution() {
     esac
 }
 
-is_env_installed() {
+is_tool_installed() {
     git status --ignored "$1" | egrep -q 'Untracked|Ignored'
 }
 
-verify_env() {
-    if [[ -z "$ENVIRONMENT" ]]; then
-        ENVIRONMENT="$COMMAND" log_error "must provide, at least, one environment to $COMMAND"
+verify_target() {
+    if [[ -z "$TARGET" ]]; then
+        TARGET="$COMMAND" log_error "must provide, at least, one environment to $COMMAND"
         return 1
     fi
 
-    if [[ ! -d "$MANAGE_ROOT/$ENVIRONMENT" ]]; then
-        ENVIRONMENT="$COMMAND" log_error "invalid environment $ENVIRONMENT"
+    if [[ ! -d "$DTMGR_HOME/$TARGET" ]]; then
+        TARGET="$COMMAND" log_error "invalid environment $TARGET"
         return 1
     fi
 }
@@ -130,7 +137,9 @@ run_root_script()
         if [[ "$script_failed" -eq 0 ]]; then
             log_info "root $script_type script completed with success"
         else
-            log_error "root $script_type script failed"
+            # Move the logfile to a temporary location, the target directory will be cleaned
+            tmp_file="$(log_temp_file "$log_file")"
+            log_error "root $script_type script failed (log file moved to $tmp_file)"
             cat "$log_file" >&2
 
             # clean before exiting
@@ -159,7 +168,9 @@ run_script()
     if [[ "$script_failed" -eq 0 ]]; then
         log_info "$script script finished"
     else
-        log_error "$script script failed"
+        # Move the logfile to a temporary location, the target directory will be cleaned
+        tmp_file="$(log_temp_file "$log_file")"
+        log_error "$script script failed (log file moved to $tmp_file)"
         cat "$log_file" >&2
 
         # clean before exiting
@@ -174,19 +185,15 @@ run_script()
 
 cmd_install_usage() {
     cat <<EOF
-usage: $(basename $0) [FLAGS] install [OPTIONS] [ENV ...]
+usage: $(basename $0) [FLAGS] install [OPTIONS] [TOOL ...]
 
-Install/reinstall the supplied environments. This script links the binaries and,
-optionally, the dotfiles as specified in the 'links' file. Note that only links
-specified for the system '*' will be processed.
+Install/reinstall the supplied tools. Upon successfull installation of a tool,
+the binaries under the 'bin' subdirectory will be symlinked to the global 'bin'
+directory where all tools are installed.
 
 OPTIONS:
-    -a      Install all uninstalled environments (only applied if no environment
-            is supplied).
-    -r      If the environment is already installed, reinstall it. This option
-            cleans out the environment directory before reinstalling.
-    -d      Link appropriate dotfiles, according to the 'links' file, for the
-            system '*'.
+    -r      If the tool is already installed, reinstall it. The tool will be
+            uninstalled first and then installed again.
 
 Execute $(basename $0) with no arguments to see available flags.
 
@@ -194,44 +201,35 @@ EOF
 }
 
 cmd_install() {
-    local OPTIND op link_dotfiles reinstall install_all
+    local OPTIND op op_r op_all
 
-    while getopts ":dra" op; do
+    while getopts ":r" op; do
         case "$op" in
-            a)
-                install_all=1
-                ;;
-            d)
-                link_dotfiles=1
-                ;;
-            r)
-                reinstall=1
-                ;;
+            r) op_r=1 ;;
             *)
-                ENVIRONMENT="install" log_error "invalid option ($op)"
-                cmd_install_usage
-                exit 1
+                TARGET="install" log_error "invalid option ($op)"; cmd_install_usage; exit 1 ;;
         esac
     done
     shift $((OPTIND-1))
 
-    environment_list="$@"
-    if [[ -z "$environment_list" ]]; then
-        [[ "$install_all" -eq 1 ]] && environment_list="$($0 list -u)" || \
-            ENVIRONMENT="install" log_fatal "an environment is required"
-    fi 
+    tools="$@"
+    [[ -z "$tools" ]] && TARGET="install" log_fatal "a tool is required"
 
-    for ENVIRONMENT in $environment_list; do
-        verify_env || continue
+    for TARGET in $tools; do
+        verify_target || continue
 
-        if [[ "${reinstall:-0}" -eq 0 ]] && is_env_installed "$PWD/$ENVIRONMENT"; then
-            log_info "environment already installed, use -r to reinstall"
-            continue
+        if is_tool_installed "$PWD/$TARGET"; then
+            # tool installed, if -r option was not supplied, continue
+            if [[ "${op_r:-0}" -eq 0 ]]; then
+                log_info "tool already installed, use -r to reinstall"
+                continue
+            fi
+
+            $0 uninstall $TARGET
         fi
 
-        cd $ENVIRONMENT
-        clean_this
-
+        cd $TARGET
+        
         # the first line in all install scripts should have the -ex flags
         if [[ $(for i in install* uninstall*; do if [[ -e "$i" ]]; then head -1 "$i"; fi; done | \
             sort | uniq | grep -v '^#!/bin/bash -ex$' | wc -l) -ne 0 ]]
@@ -250,7 +248,7 @@ cmd_install() {
         run_script "install" "install.log"
 
         cd ..
-        LINK_DOTFILES=${link_dotfiles:-0} cmd_link -m -b -o "$ENVIRONMENT"
+        cmd_link -b "$TARGET"
     done
 }
 
@@ -260,129 +258,92 @@ cmd_install() {
 
 cmd_link_usage() {
     cat <<EOF
-usage: $(basename $0) [FLAGS] link [OPTIONS] [ENV ...]
+usage: $(basename $0) [FLAGS] link [OPTIONS] [TARGET ...]
 
-Link binaries and dotfiles for the supplied environments.
+Link binaries and dotfiles for the supplied targets.
 
 OPTIONS:
-    -i          Apply links to all installed environments (only applied if no
-                environment is supplied). Unsets -a.
-    -a          Apply links to all environments (only applied if no environment is
-                supplied). Unsets -i.
     -b          Link binaries (from 'bin' subdirectory)
-    -d          Link dotfiles (according to 'links' file)
+    -s          Link files from the 'sym' directory, according to the 'links' file
     -m          Create parent directories
-    -s <sys>    Link files specified for the supplied <sys> (default: *)
-    -o          Link only files for the specifed system (-s option)
+    -o          Link only files for the current host
 
 Execute $(basename $0) with no arguments to see available flags.
 
 EOF
 }
 
-extract_and_strip() {
-    printf 
-}
-
 cmd_link() {
-    local OPTIND op environment_list link_all link_installed host sys dot dest link_mkdir link_host_only
+    local OPTIND op op_sym op_bin op_mkdir op_host use_sudo
 
     while getopts ":dbiams:o" op; do
         case "$op" in
-            i)
-                link_installed=1
-                link_all=0
-                ;;
-            a)
-                link_all=1
-                link_installed=0
-                ;;
-            d)
-                LINK_DOTFILES=1
-                ;;
-            b)
-                LINK_BINARIES=1
-                ;;
-            m)
-                link_mkdir=1
-		;;
-	    o)
-	        link_host_only=1
-		;;
-	    :)
-		ENVIRONMENT="link" log_error "option (-$OPTARG) expects one argument"; cmd_link_usage; exit 1
-		;;
+            s) op_sym=1 ;;
+            b) op_bin=1 ;;
+            m) op_mkdir=1 ;;
+	        o) op_host=1 ;;
+	        :)
+		        ENVIRONMENT="link" log_error "option (-$OPTARG) expects one argument"; cmd_link_usage; exit 1 ;;
             *)
-                ENVIRONMENT="link" log_error "invalid option ($op)"; cmd_link_usage; exit 1
-                ;;
+                ENVIRONMENT="link" log_error "invalid option ($op)"; cmd_link_usage; exit 1 ;;
         esac
     done
     shift $((OPTIND-1))
-
-    LINK_DOTFILES=${LINK_DOTFILES:-0}
-    LINK_BINARIES=${LINK_BINARIES:-0}
-    link_all=${link_all:-0}
-    link_installed=${link_installed:-0}
-    link_mkdir=${link_mkdir:-0}
-    link_host_only=${link_host_only:-0}
+    
+    op_sym=${op_sym:-0}
+    op_bin=${op_bin:-0}
 
     # if there is nothing to link, do nothing
-    if [[ "$LINK_BINARIES" -eq 0 && "$LINK_DOTFILES" -eq 0 ]]; then
-        ENVIRONMENT="link" log_warn "nothing to link. specify, at least, one of these options: '-b' or '-d'"
+    if [[ "$op_bin" -eq 0 && "$op_sym" -eq 0 ]]; then
+        TARGET="link" log_error "nothing to link. specify, at least, one of these options: '-b' or '-s'"
         cmd_link_usage
-        exit
+        exit 1
     fi
 
-    environment_list="$@"
-    if [[ -z "$environment_list" ]]; then
-        [[ "$link_installed" -eq 1 ]] && environment_list="$($0 list -i)"
-        [[ "$link_all" -eq 1 ]] && environment_list="$($0 list -iu)"
+    targets="$@"
+    [[ -z "$targets" ]] && TARGET="link" log_fatal "a target is required"
+
+    for TARGET in $targets; do
+        verify_target || continue
+        cd $TARGET
         
-        [[ -z "$environment_list" ]] && ENVIRONMENT="link" log_fatal "no environments to link"
-    fi
-
-    for ENVIRONMENT in $environment_list; do
-        verify_env || continue
-        cd $ENVIRONMENT
-
-        # link binaries
-        if [[ "$LINK_BINARIES" -eq 1 && -d "./bin" ]]; then
-            for f in $PWD/bin/*; do
-                link_file "$f" "$OLDPWD/bin/$(basename $f)"
+        if [[ "$op_bin" -eq 1 && -d "./bin" ]]; then
+            # link binaries
+            for b in $PWD/bin/*; do
+                link_file "$b" "$OLDPWD/bin/$(basename $b)"
             done
             log_info "bin symlinks updated"
         fi
 
-        # link dotfiles
-        if [[ "$LINK_DOTFILES" -eq 1 && -f "./links" ]]; then
-            while read -r line; do 
-		host="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
-	        dot="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1')"
-		dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
+        if [[ "$op_sym" -eq 1 && -f "./links" ]]; then
+            # link files from the sym directory
+            while read -r line; do
+                host="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
+                sym="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1')"
+                dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
+                destdir="$(dirname "$dest")"
 
-		# skip unwanted entries
-		[[ "$link_host_only" -eq 1 && "$(cat /etc/hostname)" != "$host" ]] && continue
-		[[ "$host" != "*" && "$(cat /etc/hostname)" != "$host" ]] && continue
+                # skip unwanted entries
+                [[ "$op_host" -eq 1 && "$(cat /etc/hostname)" != "$host" ]] && continue
+                [[ "$host" != "*" && "$(cat /etc/hostname)" != "$host" ]] && continue
 
-		# create parent directories
-		[[ "$link_mkdir" -eq 1 ]] && (mkdir -p $(dirname $dest) 2>/dev/null || true)
+                # create parent directories
+                [[ "${op_mkdir:-0}" -eq 1 ]] && mkdir -p $(dirname $dest) 2>/dev/null || true
+                [[ ! -d "$destdir" ]] && \
+                    (log_error "missing parent directory ($destdir) consider using -m"; continue)
 
-		# check if we have write permissions on the destination directory
-		if [[ ! -w "$(dirname $dest)" ]]; then
-		    # are we allowed to run sudo?
-		    if [[ "$ALLOW_SUDO" -ne 1 ]]; then
-			log_warn "'$dot' is ment to be linked to '$dest', but you" \
-			    "don't have write permission. consider using the '-s' FLAG" \
-			    "to link it as sudo"
-			continue
-		    fi
+                # check if we have write permission on the destination directory
+                if [[ ! -w "$destdir" ]]; then
+                    if [[ "$ALLOW_SUDO" -ne 1 ]]; then
+                        log_error "operation not permitted, consider using the -s FLAG"
+                        continue
+                    fi
 
-		    USE_SUDO=1 link_file "$OLDPWD/.dotfiles/$dot" "$dest"
-		else
-		    link_file "$OLDPWD/.dotfiles/$dot" "$dest"
-		fi
-	    done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
-            log_info "dotfiles links updated"
+                    use_sudo=1
+                fi
+
+                USE_SUDO=${use_sudo:-0} link_file "$OLDPWD/sym/$sym" "$dest"
+            done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
         fi
 
         cd ..
@@ -395,13 +356,9 @@ cmd_link() {
 
 cmd_uninstall_usage() {
     cat <<EOF
-usage: $(basename $0) [FLAGS] uninstall [OPTIONS] [ENV ...]
+usage: $(basename $0) [FLAGS] uninstall [TOOL ...]
 
-Uninstall the supplied environments.
-
-OPTIONS:
-    -a      Uninstall all installed environments (only applied if no environment
-            is supplied).
+Uninstall the supplied tools.
 
 Execute $(basename $0) with no arguments to see available FLAGS.
 
@@ -409,33 +366,15 @@ EOF
 }
 
 cmd_uninstall() {
-    local OPTIND op uninstall_all environment_list
+    tools="$@"
+    [[ -z "$tools" ]] && tools="$(cmd_list -i)"
 
-    while getopts ":a" op; do
-        case "$op" in
-            a)
-                uninstall_all=1
-                ;;
-            *)
-                ENVIRONMENT="uninstall" log_error "invalid option ($op)"
-                cmd_uninstall_usage
-                exit 1
-        esac
-    done
-    shift $((OPTIND-1))
+    for TARGET in $tools; do
+        verify_target || continue
 
-    environment_list="$@"
-    [[ -z "$environment_list" ]] && environment_list="$($0 list -i)"
+        is_tool_installed "$TARGET" || (log_warn "environment not installed"; continue)
 
-    for ENVIRONMENT in $environment_list; do
-        verify_env || continue
-
-        if ! is_env_installed "$ENVIRONMENT"; then
-            log_warn "environment not installed"
-            continue
-        fi
-
-        cd $ENVIRONMENT
+        cd $TARGET
 
         log_info "starting uninstall, logging to $PWD/uninstall.log"
         
@@ -445,7 +384,29 @@ cmd_uninstall() {
         # run regular uninstall script
         run_script "uninstall" "uninstall.log"
 
-	# TODO: remove symbolic links
+        # remove symlinks from the bin directory
+        if [[ -d "./bin" ]]; then
+            for b in $PWD/bin/*; do
+                candidate="$OLDPWD/bin/$(basename $b)"
+                [[ "$(readlink $candidate)" == "$b" ]] && rm -f "$candidate"
+            done
+        fi
+
+        # remove symlinks from the sym directory
+        if [[ -f "./links" ]]; then
+            while read -r line; do
+                host="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
+                sym="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1')"
+                dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
+
+                # skip unwanted entries
+                [[ "$op_host" -eq 1 && "$(cat /etc/hostname)" != "$host" ]] && continue
+                [[ "$host" != "*" && "$(cat /etc/hostname)" != "$host" ]] && continue
+
+                [[ "$(readlink $dest)" == "$OLDPWD/sym/$sym" ]] && (rm -f "$dest" || \
+                    log_warn "couldn't remove symlink '$dest'")
+            done <<< "$(grep -vxE '^[[:blank:]]*(#.*)?$' ./links)"
+        fi
 
         # clean the environment directory
         clean_this
@@ -464,11 +425,12 @@ cmd_list_usage() {
     cat <<EOF
 usage: $(basename $0) [FLAGS] list [COMMAND OPTIONS]
 
-List available environments.
+List available targets.
 
 OPTIONS:
-    -i      List installed environments
-    -u      List uninstalled environments
+    -s      List targets with a 'links' file
+    -i      List installed tools
+    -u      List uninstalled tools
 
 Execute $(basename $0) with no arguments to see available flags.
 
@@ -476,34 +438,30 @@ EOF
 }
 
 cmd_list() {
-    local OPTIND op environment_list installed uninstalled
+    local OPTIND op op_in op_un op_sym
 
-    while getopts ":iu" op; do
+    while getopts ":siu" op; do
         case "$op" in
-            i)
-                installed=1
-                ;;
-            u)
-                uninstalled=1
-                ;;
-            *)
-                ENVIRONMENT="list" log_error "invalid option ($op)"
-                cmd_list_usage
-                exit 1
+            i) op_in=1 ;;
+            u) op_un=1 ;;
+            *) TARGET="list" log_error "invalid option ($op)"; cmd_list_usage; exit 1 ;;
         esac
     done
     shift $((OPTIND-1))
 
-    installed=${installed:-0}
-    uninstalled=${uninstalled:-0}
+    op_in=${op_in:-0}
+    op_un=${op_un:-0}
+    op_sym=${op_sym:-0}
 
-    for e in *; do
-        [[ "$(find $e -name 'install*' -o -name 'links' 2>/dev/null | wc -l)" -eq 0 ]] && continue
-
-        if is_env_installed "$e"; then
-            [[ "$installed" -eq 1 ]] && echo "$e"
-        else
-            [[ "$uninstalled" -eq 1 ]] && echo "$e"
+    for t in *; do
+        if [[ "$op_sym" -eq 1 && "$(find $t -name 'links' 2>/dev/null | wc -l)" -gt 0 ]]; then
+            echo "$t"
+        elif [[ "$(find $f -name 'install*' 2>/dev/null | wc -l)" -gt 0 ]]; then
+            if is_tool_installed "$t"; then
+                [[ "$op_in" -eq 1 ]] && echo "$t"
+            else
+                [[ "$op_un" -eq 1 ]] && echo "$t"
+            fi
         fi
     done
 }
@@ -523,10 +481,10 @@ FLAGS:
     -h      Command specific help
 
 COMMANDS:
-    install     Install/reinstall the supplied environments
+    install     Install/reinstall the supplied tools
     link        Update bin symlinks and link dotfiles
-    uninstall   Uninstall the supplied environments
-    list        List available environments
+    uninstall   Uninstall the supplied targets
+    list        List available targets
 
 EOF
 }
@@ -537,30 +495,19 @@ EOF
 # parse the script flags
 while getopts ":svnh" op; do
     case "$op" in
-        s)
-            ALLOW_SUDO=1
-            ;;
-        v)
-            VERBOSE_OUTPUT=1
-            ;;
-        h)
-            SHOW_HELP=1
-            ;;
-        n)
-            NICE_LEVEL=10
-            ;;
-        *)
-            ENVIRONMENT="ERROR" log_error "invalid flag ($op)"
-            usage
-            exit 1
+        s) export ALLOW_SUDO=1 ;;
+        v) export VERBOSE_OUTPUT=1 ;;
+        h) SHOW_HELP=1 ;;
+        n) export NICE_LEVEL=10 ;;
+        *) export TARGET="ERROR" log_error "invalid flag ($op)"; usage; exit 1
     esac
 done
 shift $((OPTIND-1))
 
+[[ -z ${ALLOW_SUDO+x} ]] && export ALLOW_SUDO=0
+[[ -z ${NICE_LEVEL+x} ]] && export NICE_LEVEL=0
+[[ -z ${VERBOSE_OUTPUT+x} ]] && export VERBOSE_OUTPUT=0
 SHOW_HELP=${SHOW_HELP:-0}
-ALLOW_SUDO=${ALLOW_SUDO:-0}
-VERBOSE_OUTPUT=${VERBOSE_OUTPUT:-0}
-NICE_LEVEL=${NICE_LEVEL:-0}
 
 # parse the command
 COMMAND="$1"; shift
@@ -571,14 +518,11 @@ if [[ -z "$COMMAND" ]]; then
     exit 1
 fi
 
-cd $MANAGE_ROOT
+cd $DTMGR_HOME
 
 case "$COMMAND" in
     install|link|uninstall|list)
-        [[ "$SHOW_HELP" -eq 1 ]] && cmd_${COMMAND}_usage || cmd_${COMMAND} "$@"
-        ;;
+        [[ "$SHOW_HELP" -eq 1 ]] && cmd_${COMMAND}_usage || cmd_${COMMAND} "$@" ;;
     *)
-        ENVIRONMENT="$COMMAND" log_error "invalid command '$COMMAND'"
-        usage
-        exit 1
+        TARGET="$COMMAND" log_error "invalid command '$COMMAND'"; usage; exit 1
 esac
