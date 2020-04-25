@@ -27,6 +27,9 @@ xcape -t 300 -e 'Control_L=Escape'
 # set keyboard key repeat rate
 xset r rate 200 35
 
+# Keyboard layouts (use alt + shift to toggle between layouts)
+setxkbmap -layout us,us -variant ,intl -option grp:alt_shift_toggle
+
 # ------------------------------------------------------------------------------
 #   MONITORS
 # ------------------------------------------------------------------------------
