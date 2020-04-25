@@ -1,0 +1,4 @@
+* : xorg/xinitrc : $XDG_CONFIG_HOME/xorg/xinitrc
+
+cosmos : xorg/cosmos/xprofile : $XDG_CONFIG_HOME/xorg/xprofile
+cosmos : xorg/cosmos/Xresources : $XDG_CONFIG_HOME/xorg/Xresources
