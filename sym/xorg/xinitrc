@@ -51,7 +51,7 @@ fi
 session=${1:-bspwm}
 
 case $session in
-    bspwm       ) exec bspwm ;;
+    bspwm       ) exec ssh-agent bspwm ;;
     # No known session, try to run it as a command
     *           ) exec $1 ;;
 esac

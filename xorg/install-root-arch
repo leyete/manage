@@ -8,3 +8,6 @@ pacman -Syu --noconfirm xorg-server xorg-xrdb xorg-xrandr xorg-xmodmap xorg-xset
 
 pacman -Syu --noconfirm xorg-fonts-encodings xorg-bdftopcf xorg-mkfontscale \
     xorg-mkfontdir xorg-font-util
+
+# For Trackpad configuration
+[[ "$(cat /etc/hostname)" == "cosmos" ]] && pacman -Syu --noconfirm xf86-input-libinput xorg-xinput
