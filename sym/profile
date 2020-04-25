@@ -42,4 +42,4 @@ eval "$(dircolors $DTMGR_HOME/sym/dircolors.256dark)"
 # until it gets fixed. We will use the i965 driver instead.
 # Bug tracker: https://gitlab.freedesktop.org/mesa/mesa/-/issues/2552
 export MESA_LOADER_DRIVER_OVERRIDE=i965
-[ "$(tty)" = "/dev/tty1" ] && ! ps -e | grep -qw Xorg && exec startx $XDG_CONFIG_HOME/xorg/xinitrc $session
+[ "$(tty)" = "/dev/tty1" ] && ! ps -e | grep -qw Xorg && exec startx $XDG_CONFIG_HOME/xorg/xinitrc bspwm
