@@ -1,0 +1,7 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for bspwm (and sxhkd)
+# https://github.com/baskerville/bspwm
+# https://github.com/baskerville/sxhkd
+
+pacman -Syu --noconfirm bspwm sxhkd
