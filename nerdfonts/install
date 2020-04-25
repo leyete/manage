@@ -1,0 +1,33 @@
+#!/bin/bash -ex
+#
+# Installation script for Nerd Fonts
+# https://www.nerdfonts.com
+
+find_latest_version() {
+    git ls-remote --tags git://github.com/ryanoasis/nerd-fonts \
+    | grep -oh 'v\([0-9]\{1,2\}\.\)\{1,2\}[0-9]\{1,2\}' \
+    | sort --version-sort -r \
+    | head -n1
+}
+
+
+version="$(find_latest_version)"
+
+fonts=(
+        "Inconsolata"
+)
+
+mkdir fonts && cd $_
+
+# make sure the user fonts directory is created
+[[ ! -d "$XDG_DATA_HOME/fonts" ]] && mkdir -p "$XDG_DATA_HOME/fonts/"
+
+# download and install the fonts
+for font in "${fonts[@]}"; do
+    curl -fsSLO "https://github.com/ryanoasis/nerd-fonts/releases/download/${version}/${font}.zip"
+    7z e -o "$font" "${font}.zip"
+
+    for f in "$PWD/$font/*"; do
+        ln -sf "$f" "$XDG_DATA_HOME/fonts/$(basename "$f")"
+    done
+done
