@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# Startup configuration shell script for xinit/startx.
+# https://wiki.archlinux.org/index.php/Xinit
+
+# ------------------------------------------------------------------------------
+#   VARIABLES WITH PATHS
+# ------------------------------------------------------------------------------
+
+# Xresources
+userresources=$XDG_CONFIG_HOME/xorg/Xresources
+sysresources=/etc/X11/xinit/.Xresources
+
+# Xmodmap
+sysmodmap=/etc/X11/xinit/.Xmodmap
+usermodmap=$XDG_CONFIG_HOME/xorg/Xmodmap
+
+# xprofile
+xprofile=$XDG_CONFIG_HOME/xorg/xprofile
+
+# ------------------------------------------------------------------------------
+#   SETUP
+# ------------------------------------------------------------------------------
+
+# merge Xresources
+[ -f "$sysresources" ] && xrdb -merge "$sysresources"
+[ -f "$userresources" ] && xrdb -merge "$userresources"
+
+# set keyboard mappings
+[ -f "$sysmodmap" ] && xmodmap "$sysmodmap"
+[ -f "$usermodmap" ] && xmodmap "$usermodmap"
+
+# add custom user font path
+xset -fp $XDG_DATA_HOME/fonts/
+
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+    for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
+        [ -x "$f" ] && . "$f"
+    done
+    unset f
+fi
+
+# ------------------------------------------------------------------------------
+#   STARTUP PROGRAMS
+# ------------------------------------------------------------------------------
+
+# souce xprofile
+[ -f "$xprofile" ] && . "$xprofile"
+
+# Use bspwm as the default session
+session=${1:-bspwm}
+
+case $session in
+    bspwm       ) exec bspwm ;;
+    # No known session, try to run it as a command
+    *           ) exec $1 ;;
+esac

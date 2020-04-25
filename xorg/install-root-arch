@@ -1,0 +1,10 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for the Xorg display server
+# https://www.x.org
+
+pacman -Syu --noconfirm xorg-server xorg-xrdb xorg-xrandr xorg-xmodmap xorg-xset \
+    xorg-xinit xorg-xauth
+
+pacman -Syu --noconfirm xorg-fonts-encodings xorg-bdftopcf xorg-mkfontscale \
+    xorg-mkfontdir xorg-font-util
