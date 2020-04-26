@@ -1,0 +1,9 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for Polybar
+# https://github.com/polybar/polybar
+
+set -eu -o pipefail
+
+pacman -Syu --noconfirm pkgconf python-sphinx cmake xcb-util-xrm xcb-util-wm xcb-util-image \
+    xcb-util-cursor libpulse libnl libmpdclient cairo alsa-lib

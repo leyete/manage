@@ -1,0 +1,5 @@
+* : polybar/launch.sh : $XDG_CONFIG_HOME/polybar/launch.sh
+* : polybar/scripts : $XDG_CONFIG_HOME/polybar/scripts
+* : polybar/config : $XDG_CONFIG_HOME/polybar/config
+
+cosmos : polybar/host-config/cosmos : $XDG_CONFIG_HOME/polybar/host-config

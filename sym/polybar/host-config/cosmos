@@ -1,0 +1,18 @@
+; vim:ft=dosini
+
+[config]
+monitor = ${env:MONITOR:eDP1}
+dpi = 96
+width = 100%
+height = 2%
+offset-x = 0%
+offset-y = 0%
+radius = 0.0
+
+battery-full-at = 99
+battery-bat = BAT0
+battery-adp = AC
+
+top-left = bspwm
+top-center =
+top-right = wireless-network battery
