@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# Script to wrap the nordvpn command-line tool with Dmenu
+# https://tools.suckless.org/dmenu
+# https://nordvpn.com
+
+set -eu -o pipefail
+
+
+##  FUNCTIONS  ##
+
+dmenu_prompt() {
+    # dmenu_prompt
+    #
+    #   invoke dmenu with the appropriate font and configuration options
+
+    dmenu -fn "Inconsolata Nerd Font:pixelsize=30" -i -p "$1"
+}
+
+connect_country() {
+    # connect_country
+    #
+    #   use dmenu to choose one of the available countries to connect to
+
+    choice="$(for c in $(nordvpn countries; echo auto); do \
+        [[ "$c" =~ "-" ]] || sed 's/^\r/--/; s/,$//; s/--//' <<< $c; done | dmenu_prompt "Choose a country: ")"
+
+    case "$choice" in
+        auto) nordvpn connect ;;
+        *) nordvpn countries | grep "$choice" >/dev/null && nordvpn connect "$choice" || (echo "ERROR: invalid country ($choice)"; exit 1)
+    esac
+}
+
+usage() {
+    # usage
+    #
+    #   show script usage
+
+    echo "usage: $(basename $0) <action> [arg]"
+    echo ""
+    echo "ACTIONS:"
+    echo "    c        Connect to one of the listed countries (recommended city)"
+}
+
+##  MAIN ~ BEGINING OF THE SCRIPT  ##
+
+[[ "$#" -lt 1 ]] && ( usage; exit 1 )
+
+case "$1" in
+    c) connect_country ;;
+    *) echo "ERROR: unknown action"; usage; exit 1 ;;
+esac
