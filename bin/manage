@@ -140,7 +140,6 @@ run_root_script()
             # Move the logfile to a temporary location, the target directory will be cleaned
             tmp_file="$(log_temp_file "$log_file")"
             log_error "root $script_type script failed (log file moved to $tmp_file)"
-            cat "$log_file" >&2
 
             # clean before exiting
             clean_this
@@ -171,7 +170,6 @@ run_script()
         # Move the logfile to a temporary location, the target directory will be cleaned
         tmp_file="$(log_temp_file "$log_file")"
         log_error "$script script failed (log file moved to $tmp_file)"
-        cat "$log_file" >&2
 
         # clean before exiting
         clean_this
@@ -377,7 +375,10 @@ cmd_uninstall() {
     for TARGET in $tools; do
         verify_target || continue
 
-        is_tool_installed "$TARGET" || (log_warn "environment not installed"; continue)
+        if ! is_tool_installed "$TARGET"; then
+            log_warn "environment not installed"
+            continue
+        fi
 
         cd $TARGET
 
