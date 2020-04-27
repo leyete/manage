@@ -143,10 +143,13 @@ super + shift + ctrl + x
 	dmenu_run
 
 # ------------------------------------------------------------------------------
-#   SYSTEM CONTROL KEYBINDINGS (super + shift + key)
+#   SYSTEM CONTROL KEYBINDINGS
 # ------------------------------------------------------------------------------
 
 # Brightness control
-super + shift + {Up,Down}
+{XF86MonBrightnessUp, XF86MonBrightnessDown}
         brightness -{i,d} 0.1
 
+# Shutdown/Reboot the system
+super + shift + {Delete, Insert}
+        systemctl {poweroff, reboot}

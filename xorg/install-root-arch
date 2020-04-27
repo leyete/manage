@@ -4,10 +4,13 @@
 # https://www.x.org
 
 pacman -Syu --noconfirm xorg-server xorg-xrdb xorg-xrandr xorg-xmodmap xorg-xset \
-    xorg-xinit xorg-xauth
+    xorg-xinit xorg-xauth xorg-xsetroot
 
 pacman -Syu --noconfirm xorg-fonts-encodings xorg-bdftopcf xorg-mkfontscale \
     xorg-mkfontdir xorg-font-util
+
+# not quite relevant to the xorg group but they build a more complete Xorg setup
+pacman -Syu --noconfirm xcape xclip maim xdotool
 
 # For Trackpad configuration
 [[ "$(cat /etc/hostname)" == "cosmos" ]] && pacman -Syu --noconfirm xf86-input-libinput xorg-xinput

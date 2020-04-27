@@ -8,6 +8,7 @@
 # ------------------------------------------------------------------------------
 
 sxhkd &  # start the simple X hotkey daemon to manage bspwm keybindings
+libinput-gestures -c $XDG_CONFIG_HOME/bspwm/libinput-gestures.conf &
 $XDG_CONFIG_HOME/polybar/launch.sh top & # launch polybar
 
 # ------------------------------------------------------------------------------
@@ -52,6 +53,6 @@ bspc config presel_feedback_color "#5e81ac"
 #   RULES
 # ------------------------------------------------------------------------------
 
-bspc rule -a firefox desktop=^2
+bspc rule -a firefox desktop=^2 follow=on
 bspc rule -a TelegramDesktop desktop=^5
 bspc rule -a discord desktop=^5
