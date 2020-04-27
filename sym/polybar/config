@@ -79,10 +79,11 @@ padding = 1
 module-margin = 1
 
 override-redirect = false
+wm-restack = bspwm
 
-font-0 = Inconsolata Nerd Font:pixelsize=12:style=Regular;1
-font-1 = Inconsolata Nerd Font:pixelsize=12:style=Medium;1
-font-2 = Inconsolata Nerd Font:pixelsize=12:style=Bold;1
+font-0 = Inconsolata Nerd Font:pixelsize=20:style=Regular;1
+font-1 = Inconsolata Nerd Font:pixelsize=20:style=Medium;1
+font-2 = Inconsolata Nerd Font:pixelsize=20:style=Bold;1
 
 modules-left = ${config.top-left}
 modules-center = ${config.top-center}
@@ -91,13 +92,51 @@ modules-right = ${config.top-right}
 cursor-click = pointer
 cursor-scroll = ns-resize
 
-tray-position = right
+[bar/bottom]
+monitor = ${config.monitor}
+monitor-exact = false
+
+bottom = true
+
+width = ${config.width}
+height = ${config.height}
+offset-x = ${config.offset-x}
+offset-y = ${config.offset-y}
+radius = ${config.radius}
+
+fixed-center = true
+dpi = ${config.dpi}
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+line-size = 2
+
+padding = 1
+module-margin = 1
+
+override-redirect = false
+wm-restack = bspwm
+
+font-0 = Inconsolata Nerd Font:pixelsize=20:style=Regular;1
+font-1 = JoyPixels:pixelsize=20:style=Regular:scale=7;1
+font-2 = Inconsolata Nerd Font:pixelsize=20:style=Bold;1
+
+modules-left = ${config.bottom-left}
+modules-center = ${config.bottom-center}
+modules-right = ${config.bottom-right}
+
+cursor-click = pointer
+cursor-scroll = ns-resize
+
+tray-position = center
 tray-detached = false
 tray-maxsize = 20
 tray-padding = 3
 tray-offset-x = 0
 tray-offset-y = 0
 tray-scale = 1.0
+
 
 ; ==============================================================================
 ;   MODULES
@@ -185,6 +224,26 @@ ramp-load-6-foreground = ${colors.urgent}
 ramp-load-7 = 龍
 ramp-load-7-foreground = ${colors.error}
 
+[module/cpu-temp]
+type = internal/temperature
+
+thermal-zone = 10
+
+base-temperature = 20
+warn-temperature = 60
+
+format = <ramp> <label>
+label = %temperature-c%
+
+format-warn = <ramp> <label-warn>
+label-warn = %temperature-c%
+
+ramp-0 = 
+ramp-1 = 
+ramp-1-foreground = ${colors.warning}
+ramp-2 = 
+ramp-2-foreground = ${colors.error}
+
 [module/wireless-network]
 type = internal/network
 interface = ${env:WIRELESS:wlan0}
@@ -236,3 +295,18 @@ format-foreground = ${colors.foreground}
 
 label = %date% %time%
 label-foreground = ${colors.foreground}
+
+[module/xkeyboard]
+type = internal/xkeyboard
+
+format = <label-layout>
+label-layout = 🌐 %name%
+
+[module/nordvpn]
+type = custom/script
+format = <label>
+label = %output%
+tail = true
+
+exec = $XDG_CONFIG_HOME/polybar/scripts/nordvpn.sh
+

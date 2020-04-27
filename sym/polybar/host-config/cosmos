@@ -15,4 +15,8 @@ battery-adp = AC
 
 top-left = bspwm
 top-center =
-top-right = wireless-network battery
+top-right = nordvpn wireless-network battery
+
+bottom-left = cpu cpu-temp
+bottom-center =
+bottom-right = xkeyboard date
