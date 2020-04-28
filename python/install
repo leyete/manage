@@ -26,8 +26,8 @@ install_latest_version() {
 
 	# make the bin and share directories available
 	cd ..
-	ln -sf "$version/bin" .
-	ln -sf "$version/share" . 
+	ln -sf "$PWD/$version/bin" .
+	ln -sf "$PWD/$version/share" . 
 
 	rm -rf cpython
 }
@@ -38,3 +38,9 @@ install_latest_version() {
 
 # install virtualenvwrapper
 python3 -m pip install virtualenvwrapper
+
+# copy the scripts to the bin subdirectory
+[[ ! -d "./bin" ]] && mkdir bin
+for script in $PWD/.data/scripts/*; do
+    ln -sf "$script" "$PWD/bin/$(basename $script)"
+done

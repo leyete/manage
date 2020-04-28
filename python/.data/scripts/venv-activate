@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#
+# Helper script to activate a certain Python virtual environment using virtualenv
+# https://virtualenv.pypa.io/en/stable
+
+set -eu -o pipefail
+
+# set the python interpreter
+[[ -z ${PY_INTERPRETER-} ]] && PY_INTERPRETER=$(which python)
+
+# set and create the working home
+[[ -z ${WORKON_HOME+} ]] && export WORKON_HOME="$DTMGR_HOME/python/.virtualenvs"
+[[ ! -d "$WORKON_HOME" ]] && mkdir -p "$WORKON_HOME"
+
+if [[ -z "$1" ]]; then
+    echo "ERROR: missing virtual environment"
+    exit 1
+fi
+
+VE_DIR="$WORKON_HOME/$1"
+
+if [[ -d "$VE_DIR" || ! -e "$VE_DIR/bin/activate" ]]; then
+    echo "[+] Creating $(readlink -f "$PY_INTERPRETER") virtualenv '$1'"
+    virtualenv --system-site-packages -p "$PY_INTERPRETER" "$VE_DIR"
+fi
+
+if [[ -z ${VIRTUAL_ENV+x} || "$VIRTUAL_ENV" != "$VE_DIR" ]]; then
+    if [[ -n ${VIRTUAL_ENV+x} ]]; then
+        source "$VIRTUAL_ENV/bin/activate"
+        deactivate
+    fi
+    source "$VE_DIR/bin/activate"
+fi
