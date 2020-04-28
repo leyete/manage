@@ -37,8 +37,8 @@ log_fatal() {
 }
 
 log_temp_file() {
-    local logfile="${1%.*}$(date +"%Y%m%d-%H-%M-%S").log"
-    cp "$1" "/tmp/$logfile" 2>/dev/null
+    local logfile="/tmp/${1%.*}$(date +"%Y%m%d-%H-%M-%S").log"
+    cp "$1" "$logfile" 2>/dev/null
     echo "$logfile"
 }
 
@@ -416,7 +416,7 @@ cmd_uninstall() {
         # clean the environment directory
         clean_this
 
-        log_info "environment uninstalled successfully"
+        log_info "target uninstalled successfully"
 
         cd ..
     done
