@@ -1,0 +1,60 @@
+#!/bin/bash -ex
+#
+# Installation script for Golang
+# https://golang.org
+
+set -eu -o pipefail
+
+find_latest_version() {
+	git ls-remote --tags git://github.com/golang/go.git \
+	| grep -v 'weekly\|rc\|beta' \
+	| grep -oh 'go[0-9]\{1,2\}\.[0-9]\{1,2\}\([0-9]\{1,2\}\)\?' \
+	| sort --version-sort -r \
+	| head -n 1 
+}
+
+install_latest_version() {
+	version="$(find_latest_version)"
+
+	version=$(find_latest_go_release)
+	curl -sSLO "https://dl.google.com/go/${version}.linux-amd64.tar.gz"
+
+	tar -xzf "${version}.linux-amd64.tar.gz" && rm -f $_
+}
+
+set_environment() {
+	env_files=(
+		"$DTMGR_HOME/zsh/oh-my-zsh/custom/environment.zsh" # for zsh
+	)
+	
+    for f in "${env_files[@]}"; do
+	    [[ ! -d "$(dirname "$f")" ]] && continue
+
+        magic="# GOLANG: environment variables and PATH"
+        if ! grep "$magic" "$f" >/dev/null 2>&1; then
+            if [[ "$DISTRI" != "arch" ]]; then
+                cat >> "$f" << EOF
+
+$magic
+export GOROOT="$PWD/go"
+export GOPATH="\$HOME/go"
+export GOBIN="\$GOPATH/bin"
+export PATH="\$PATH:\$GOROOT/bin:\$GOBIN"
+EOF
+            else
+                cat >> "$f" << EOF
+
+$magic
+export GOPATH="\$HOME/go"
+export GOBIN=\$GOPATH/bin"
+export PATH="\$PATH:\$GOBIN"
+EOF
+            fi
+        fi
+    done
+}
+
+
+[[ "$DISTRI" != "arch" ]] && install_latest_version
+
+set_environment

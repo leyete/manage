@@ -1,0 +1,8 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for Golang
+# https://golang.org
+
+set -eu -o pipefail
+
+pacman -Syu --noconfirm go go-tools
