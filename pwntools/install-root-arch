@@ -1,0 +1,8 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for the Python CTF framework pwntools
+# https://github.com/Gallopsled/pwntools
+
+set -eu -o pipefail
+
+pacman -Syu --noconfirm --needed binutils openssl libffi

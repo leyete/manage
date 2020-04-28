@@ -1,0 +1,11 @@
+#!/bin/bash -ex
+#
+# Uninstall script for the CTF Python framework pwntools
+# https://github.com/Gallopsled/pwntools
+
+set -eu -o pipefail
+
+if type venv-activate >/dev/null 2>&1; then
+    source "$(which venv-activate)" ctftools
+    python -m pip uninstall -y pwntools || true
+fi

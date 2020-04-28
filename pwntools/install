@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+#
+# Installation script for the CTF Python framework pwntools
+# https://github.com/Gallopsled/pwntools
+
+set -eu -o pipefail
+
+install_latest_version() {
+    if type venv-activate >/dev/null 2>&1; then
+        source "$(which venv-activate)" ctftools
+        python -m pip install -U --user git+https://github.com/Gallopsled/pwntools.git@dev
+    fi
+}
+
+install_latest_version
