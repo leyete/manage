@@ -1,0 +1,8 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for Python
+# https://www.python.org
+
+set -eu -o pipefail
+
+pacman -Syu --noconfirm python python-pip

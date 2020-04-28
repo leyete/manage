@@ -1,0 +1,40 @@
+#!/bin/bash -ex
+#
+# Installation script for Python
+# https://www.python.org
+
+set -eu -o pipefail
+
+find_latest_version() {
+    git ls-remote --tags git://github.com/python/cpython.git \
+    | grep -v '\.[0-9]\{1,2\}\(a[0-9]\+\|b\|rc\)' \
+    | grep -oh 'v[0-9]\{1,2\}\.[0-9]\{1,2\}\(\.[0-9]\{1,2\}\)\?' \
+    | sort --version-sort -r \
+    | head -n 1
+}
+
+install_latest_version() {
+    version=$(find_latest_python_version)
+	git clone https://github.com/python/cpython.git
+
+	cd cpython
+	git checkout "$version"
+
+	./configure --prefix="$OLDPWD/$version"
+	make
+	make install
+
+	# make the bin and share directories available
+	cd ..
+	ln -sf "$version/bin" .
+	ln -sf "$version/share" . 
+
+	rm -rf cpython
+}
+
+# install most recent Python version, since Arch Linux offers a pretty decent
+# updated version through pacman, this is only required on other systems
+[[ "$DISTRI" != "arch" ]] && install_latest_version
+
+# install virtualenvwrapper
+python3 -m pip install virtualenvwrapper
