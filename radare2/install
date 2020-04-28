@@ -1,0 +1,43 @@
+#!/bin/bash -ex
+#
+# Installation script for the radare2 Reverse Engineering framework
+# https://github.com/radareorg/radare2
+
+set -eu -o pipefail
+
+
+install_latest_version() {
+    # download the latest source code
+    git clone --depth 1 https://github.com/radare/radare2.git && cd radare2/
+    
+    # compile and install it
+    ./configure --prefix=$(dirname $PWD)
+    make -j $(nproc)
+    make install
+    cd ..
+
+    # create launch scripts for the binaries with the apropriate library path 
+    cd bin
+    for i in ???*
+    do
+        mv $i $i.real
+        cat <<END > $i
+#!/bin/bash
+LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$PWD/../lib $PWD/$i.real "\$@"
+END
+        chmod 755 $i
+    done
+    cd ..
+}
+
+install_latest_version
+
+# install r2pipe in the ctftools virtual environment
+if type venv-activate >/dev/null 2>&1; then
+    source "$(which venv-activate)" ctftools
+    python -m pip install -U r2pipe
+fi
+
+# install local radare2 wiki
+r2pm init && r2pm update
+r2pm install r2wiki

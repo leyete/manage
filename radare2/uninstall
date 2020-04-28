@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+#
+# Uninstall script for radare2
+# https://github.com/radareorg/radare2
+
+set -eu -o pipefail
+
+# uninstall r2pipe from the Python ctftools virtual environment
+if type venv-activate >/dev/null 2>&1; then
+    source "$(which venv-activate)" ctftools
+    python -m pip uninstall -y r2pipe || true
+fi
+
+# uninstall r2pm packages
+rm -rf "$HOME/.local/share/radare2"
