@@ -15,10 +15,7 @@ find_latest_version() {
 
 install_latest_version() {
 	version="$(find_latest_version)"
-
-	version=$(find_latest_go_release)
 	curl -sSLO "https://dl.google.com/go/${version}.linux-amd64.tar.gz"
-
 	tar -xzf "${version}.linux-amd64.tar.gz" && rm -f $_
 }
 
