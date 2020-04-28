@@ -6,7 +6,7 @@
 export DTMGR_HOME="$HOME/DTmanage"
 
 # add DTmanage/bin to the PATH
-export PATH="$DTMGR_HOME/bin:$PATH"
+export PATH="$DTMGR_HOME/bin:$HOME/.local/bin:$PATH"
 
 # ------------------------------------------------------------------------------
 # SESSION CUSTOMIZATION
