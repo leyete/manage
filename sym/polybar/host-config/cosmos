@@ -13,6 +13,8 @@ battery-full-at = 99
 battery-bat = BAT0
 battery-adp = AC
 
+cpu-hwmon-path = /sys/devices/platform/coretemp.0/hwmon/hwmon5/temp1_input
+
 top-left = bspwm
 top-center =
 top-right = nordvpn wireless-network battery

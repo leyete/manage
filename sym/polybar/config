@@ -227,10 +227,10 @@ ramp-load-7-foreground = ${colors.error}
 [module/cpu-temp]
 type = internal/temperature
 
-thermal-zone = 10
+hwmon-path = ${config.cpu-hwmon-path}
 
-base-temperature = 20
-warn-temperature = 60
+base-temperature = 40
+warn-temperature = 70
 
 format = <ramp> <label>
 label = %temperature-c%
