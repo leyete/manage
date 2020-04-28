@@ -14,7 +14,7 @@ find_latest_version() {
 }
 
 install_latest_version() {
-    version=$(find_latest_python_version)
+    version="$(find_latest_version)"
 	git clone https://github.com/python/cpython.git
 
 	cd cpython
