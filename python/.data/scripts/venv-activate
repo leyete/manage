@@ -12,7 +12,7 @@ set -eu -o pipefail
 [[ -z ${WORKON_HOME+} ]] && export WORKON_HOME="$DTMGR_HOME/python/.virtualenvs"
 [[ ! -d "$WORKON_HOME" ]] && mkdir -p "$WORKON_HOME"
 
-if [[ -z "$1" ]]; then
+if [[ -z "${1-}" ]]; then
     echo "ERROR: missing virtual environment"
     exit 1
 fi
