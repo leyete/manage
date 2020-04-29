@@ -118,7 +118,7 @@ run_root_script()
         # use debian root script if we are on one of the following distros and no specific
         # script is available
         for distri in ubuntu parrot; do
-            if [[ "$DISTRI" == "ubuntu" && ! -x "$root_script" && -x "./${script_type}-root-debian" ]]; then
+            if [[ "$DISTRI" == "$distri" && ! -x "$root_script" && -x "./${script_type}-root-debian" ]]; then
                 root_script="./${script_type}-root-debian"
                 break
             fi
