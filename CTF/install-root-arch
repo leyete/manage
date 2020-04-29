@@ -1,0 +1,25 @@
+#!/bin/bash -ex
+#
+# Arch Linux's installation script for CTFbox - a containerized CTF dedicated collection of tools
+
+set -eu -o pipefail
+
+
+# install docker
+pacman -Syu --noconfirm docker && systemctl start docker.service
+
+if ! docker info >/dev/null 2>&1; then
+    echo "ERROR: unable to run docker (docker daemon running?)"
+    exit
+fi
+
+# create the images
+declare -A images=(
+    [pwn]="radare2 pwntools"   # PWN and RE docker image
+)
+
+cd .data
+
+for image in "${!images[@]}"; do
+    docker build --rm --build-arg "TOOLS=${images[$image]}" --tag "ctf:$image" .
+done

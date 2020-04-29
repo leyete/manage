@@ -1,0 +1,13 @@
+#!/bin/sh -e
+#
+# Wrapper for a scriptable apt-get.
+
+export DEBIAN_FRONTEND=noninteractive
+
+# update the package list and install the packages
+apt-get -q update && apt-get install -q -y --auto-remove "$@"
+
+# remove package lists and apt-get metadata. Reduce the size of the
+# docker image layer.
+apt-get -q clean
+rm -rf /var/lib/apt/lists/*
