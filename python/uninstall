@@ -1,0 +1,20 @@
+#!/bin/bash -ex
+#
+# Uninstall script for Python
+# https://www.python.org
+
+set -eu -o pipefail
+
+
+remove_environment() {
+    env_files=(
+        "$DTMGR_HOME/zsh/oh-my-zsh/custom/environment.zsh" # ZSH environment
+    )
+
+    for env_file in "${env_files[@]}"; do
+        [[ -f "$env_file" ]] && sed -e "/^## PYTHON/,/^##/d" "$env_file" > "$env_file"
+    done
+}
+
+
+remove_environment

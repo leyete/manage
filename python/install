@@ -37,18 +37,17 @@ set_environment() {
         "$DTMGR_HOME/zsh/oh-my-zsh/custom/environment.zsh"  # for ZSH environment
     )
 
+    magic="## PYTHON: functions and aliases"
     for env_file in "${env_files[@]}"; do
         if [[ -d "$(dirname "$env_file")" ]]; then
-            magic="# PYTHON: functions and aliases"
-            [[ "$DISTRI" == "arch" ]] && venvwrapper_path="$HOME/.local/bin/" || venvwrapper_path="$PWD/bin"
             if ! grep "$magic" "$env_file" >/dev/null 2>&1; then
                 cat >> "$env_file" << EOF
-
 $magic
 venvwrap() {
     export WORKON_HOME="$PWD/.virtualenvs"
-    source $venvrapper_path/virtualenvwrapper.sh
+    source $([[ "$DISTRI" == "arch" ]] && echo "$HOME/.local/bin" || echo "$PWD/bin")/virtualenvwrapper.sh >/dev/null 2>&1
 }
+##
 EOF
             fi
         fi
@@ -59,8 +58,10 @@ EOF
 # updated version through pacman, this is only required on other systems
 [[ "$DISTRI" != "arch" ]] && install_latest_version
 
+export PATH="$PWD/bin:${PATH}"
+
 # install virtualenvwrapper
-bin/python3 -m pip install virtualenvwrapper
+python3 -m pip install virtualenvwrapper
 
 # copy the scripts to the bin subdirectory
 [[ ! -d "./bin" ]] && mkdir bin
