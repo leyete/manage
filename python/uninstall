@@ -12,7 +12,7 @@ remove_environment() {
     )
 
     for env_file in "${env_files[@]}"; do
-        [[ -f "$env_file" ]] && sed -e "/^## PYTHON/,/^##/d" "$env_file" > "$env_file"
+        [[ -f "$env_file" ]] && sed -i '/^## PYTHON:/,/^##$/d' "$env_file"
     done
 }
 
