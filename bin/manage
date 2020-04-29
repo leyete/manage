@@ -48,7 +48,7 @@ log_temp_file() {
 
 detect_distribution() {
     [[ ! -f /etc/os-release ]] && \
-        log_fatal "cannot read /etc/os-release. set up distro with DISTRI" \
+        TARGET="ERROR" log_fatal "cannot read /etc/os-release. set up distro with DISTRI" \
             "environment variable."
 
     os_release_id="$(cat /etc/os-release | grep -oE '^ID=([A-Za-z]+)$' | cut -d'=' -f2)"
@@ -62,8 +62,11 @@ detect_distribution() {
         *ubuntu*)
             echo "ubuntu"
             ;;
+        *parrot*)
+            echo "parrot"
+            ;;
         *)
-            log_fatal "unknown distro, set it up manually with DISTRI" \
+            TARGET="ERROR" log_fatal "unknown distro, set it up manually with DISTRI" \
                 "environment variable"
     esac
 }
@@ -112,10 +115,14 @@ run_root_script()
 
     if [[ $(find . -name "$script_type-root*" | wc -l) -ge 1 ]]; then
         root_script="./${script_type}-root-$DISTRI"
-        # use debian root script if we are on ubuntu and no specific
+        # use debian root script if we are on one of the following distros and no specific
         # script is available
-        [[ "$DISTRI" == "ubuntu" && ! -x "$root_script" && -x "./${script_type}-root-debian" ]] && \
-            root_script="./${script_type}-root-debian"
+        for distri in ubuntu parrot; do
+            if [[ "$DISTRI" == "ubuntu" && ! -x "$root_script" && -x "./${script_type}-root-debian" ]]; then
+                root_script="./${script_type}-root-debian"
+                break
+            fi
+        done
 
         [[ ! -x "$root_script" ]] && return
 
