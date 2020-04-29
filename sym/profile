@@ -3,7 +3,12 @@
 # Profile file, run on login.
 
 # change this with the location of the mange repo
-export DTMGR_HOME="$HOME/DTmanage"
+
+case "$0" in
+  *zsh) export DTMGR_HOME="$(readlink -f "$(dirname "$(readlink -f "${(%):-%N}")")/..")" ;;
+  *bash) export DTMGR_HOME="$(readlink -f "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/..")" ;;
+  *) export DTMGR_HOME="$HOME/manage" ;;
+esac
 
 # add DTmanage/bin to the PATH
 export PATH="$DTMGR_HOME/bin:$HOME/.local/bin:$PATH"
