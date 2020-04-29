@@ -32,6 +32,29 @@ install_latest_version() {
 	rm -rf cpython
 }
 
+set_environment() {
+    env_files=(
+        "$DTMGR_HOME/zsh/oh-my-zsh/custom/environment.zsh"  # for ZSH environment
+    )
+
+    for env_file in "${env_files[@]}"; do
+        if [[ -d "$(dirname "$env_file")" ]]; then
+            magic="# PYTHON: functions and aliases"
+            [[ "$DISTRI" == "arch" ]] && venvwrapper_path="$HOME/.local/bin/" || venvwrapper_path="$PWD/bin"
+            if ! grep "$magic" "$env_file" >/dev/null 2>&1; then
+                cat >> "$env_file" << EOF
+
+$magic
+venvwrap() {
+    export WORKON_HOME="$PWD/.virtualenvs"
+    source $venvrapper_path/virtualenvwrapper.sh
+}
+EOF
+            fi
+        fi
+    done
+}
+
 # install most recent Python version, since Arch Linux offers a pretty decent
 # updated version through pacman, this is only required on other systems
 [[ "$DISTRI" != "arch" ]] && install_latest_version
@@ -44,3 +67,5 @@ bin/python3 -m pip install virtualenvwrapper
 for script in $PWD/.data/scripts/*; do
     ln -sf "$script" "$PWD/bin/$(basename $script)"
 done
+
+set_environment
