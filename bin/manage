@@ -265,6 +265,7 @@ OPTIONS:
     -s          Link files from the 'sym' directory, according to the 'links' file
     -m          Create parent directories
     -o          Link only files for the current host
+    -h          Manually supply the hostname (insted of reading from /etc/hostname)
 
 Execute $(basename $0) with no arguments to see available flags.
 
@@ -272,14 +273,15 @@ EOF
 }
 
 cmd_link() {
-    local OPTIND op op_sym op_bin op_mkdir op_host use_sudo
+    local OPTIND op op_sym op_bin op_mkdir use_sudo op_host host
 
-    while getopts ":sbmo" op; do
+    while getopts ":sbmoh:" op; do
         case "$op" in
             s) op_sym=1 ;;
             b) op_bin=1 ;;
             m) op_mkdir=1 ;;
             o) op_host=1 ;;
+            h) host="$OPTARG" ;;
             :)
                 TARGET="link" log_error "option (-$OPTARG) expects one argument"; cmd_link_usage; exit 1 ;;
             *)
@@ -317,7 +319,7 @@ cmd_link() {
         if [[ "$op_sym" -eq 1 && -f "./links" ]]; then
             # link files from the sym directory
             while read -r line; do
-                host="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
+                host=${host:-"$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"}
                 sym="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1')"
                 dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
                 destdir="$(dirname "$dest")"
@@ -519,7 +521,7 @@ SHOW_HELP=${SHOW_HELP:-0}
 COMMAND="$1"; shift
 
 if [[ -z "$COMMAND" ]]; then
-    ENVIRONMENT="ERROR" log_error "missing command"
+    TARGET="ERROR" log_error "missing command"
     usage
     exit 1
 fi
