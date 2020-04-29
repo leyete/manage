@@ -39,5 +39,6 @@ if type venv-activate >/dev/null 2>&1; then
 fi
 
 # install local radare2 wiki
-bin/r2pm init && bin/r2pm update
-bin/r2pm install r2wiki
+export PATH="${PATH}:$PWD/bin"
+r2pm init && bin/r2pm update
+r2pm install r2wiki
