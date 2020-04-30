@@ -2,3 +2,5 @@
 * : zsh/zshrc : $XDG_CONFIG_HOME/zsh/.zshrc
 
 cosmos : zsh/prompts/main.zsh : $XDG_CONFIG_HOME/zsh/prompt.zsh
+
+ctf-pwn : zsh/prompts/main.zsh : $XDG_CONFIG_HOME/zsh/prompt.zsh
