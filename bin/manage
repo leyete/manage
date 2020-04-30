@@ -4,7 +4,7 @@
 
 set -eu -o pipefail
 
-export DTMGR_HOME="$(dirname "${BASH_SOURCE[@]}")/.."
+export DTMGR_HOME="$(readlink -f "$(dirname "${BASH_SOURCE[@]}")/..")"
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
