@@ -29,7 +29,22 @@ export EDITOR="nvim"
 [ -z ${XDG_CONFIG_HOME} ] && export XDG_CONFIG_HOME="$HOME/.config"
 [ -z ${XDG_DATA_HOME} ] && export XDG_DATA_HOME="$HOME/.local/share"
 
-export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+# export shell-specific variables
+case "$0" in
+  *zsh)
+    export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+    export HISTFILE="$XDG_DATA_HOME/zsh/history"
+
+    mkdir -p {$XDG_DATA_HOME,$XDG_CONFIG_HOME}/zsh 2>/dev/null
+    ;;
+
+esac
+
+# modify __interactivehook__ to allow a cleaner home directory
+if [ -f "$XDG_CONFIG_HOME/python/pythonrc" ]; then
+  export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/pythonrc"
+  mkdir -p "$XDG_DATA_HOME/python" 2>/dev/null
+fi
 
 # ------------------------------------------------------------------------------
 # DIR COLORS AND LS ICONS
