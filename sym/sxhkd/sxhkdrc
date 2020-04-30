@@ -153,3 +153,7 @@ super + shift + ctrl + x
 # Shutdown/Reboot the system
 super + shift + {Delete, Insert}
         systemctl {poweroff, reboot}
+
+# Screenshot (save to ~/Pictures/Screenshots and copy to clipboard)
+Print
+        maim -s | tee $HOME/Pictures/Screenshots/$(date +%s).png | xclip -selection clipboard -t image/png
