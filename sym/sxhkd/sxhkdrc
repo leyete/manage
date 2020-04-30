@@ -140,7 +140,7 @@ super + shift + ctrl + z
 
 # run programs
 super + shift + ctrl + x
-	dmenu_run
+	dmenu_run -fn 'Inconsolata Nerd Font:pixelsize=30'
 
 # ------------------------------------------------------------------------------
 #   SYSTEM CONTROL KEYBINDINGS
