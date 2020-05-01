@@ -1,0 +1,27 @@
+#!/bin/bash -ex
+#
+# Installation script for the terminal multiplexer TMUX
+# https://github.com/tmux/tmux
+
+set -eu -o pipefail
+
+find_latest_tmux_release() {
+    curl --silent "https://api.github.com/repos/tmux/tmux/releases/latest" \
+        | grep '"tag_name"' \
+        | sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+VERSION=$(find_latest_tmux_release)
+curl -fsSLO "https://github.com/tmux/tmux/releases/download/$VERSION/tmux-${VERSION}.tar.gz"
+
+tar xzf "tmux-${VERSION}.tar.gz"
+rm -f $_
+
+cd "tmux-${VERSION}"
+
+./configure --prefix="$OLDPWD/" CPPFLAGS="-P"
+make
+make install
+
+cd ..
+rm -rf "tmux-${VERSION}"

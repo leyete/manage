@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+#
+# Arch Linux's root installation script for the terminal emulator TMUX
+# https://github.com/tmux/tmux
+
+pacman -Syu --noconfirm tmux
