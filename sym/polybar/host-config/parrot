@@ -1,0 +1,25 @@
+; vim:ft=dosini
+
+[config]
+monitor = ${env:MONITOR:Virtual1}
+dpi = 96
+width = 100%
+height = 2%
+offset-x = 0%
+offset-y = 0%
+radius = 0.0
+
+battery-full-at =
+battery-bat =
+battery-adp =
+
+cpu-hwmon-path =
+
+top-left = bspwm
+top-center =
+top-right = hackthebox
+
+bottom-left =
+bottom-center =
+bottom-right =
+
