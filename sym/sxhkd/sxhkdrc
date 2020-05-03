@@ -130,6 +130,10 @@ super + alt + t
 super + alt + d
         discord
 
+# VirtualBox
+super + alt + v
+        dmenuvbox g
+
 # ------------------------------------------------------------------------------
 #   DMENU KEYBINDINGS (super + shift + control + key)
 # ------------------------------------------------------------------------------

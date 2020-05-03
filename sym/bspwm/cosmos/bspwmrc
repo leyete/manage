@@ -57,4 +57,4 @@ bspc rule -a firefox desktop=^2 follow=on
 bspc rule -a TelegramDesktop desktop=^5
 bspc rule -a discord desktop=^5
 bspc rule -a Eclipse desktop=^3 follow=on
-bspc rule -a VirtualBox desktop=^4 follow=on
+bspc rule -a "VirtualBox Machine" desktop=^4 follow=on

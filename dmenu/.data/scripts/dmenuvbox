@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# Script to launch a VirtualBox machine with dmenu
+
+launch_guest() {
+    guests="$(for g in "$virtualbox_home"/*; do echo "$(basename "$g")"; done)"
+    guest="$(dmenu -fn 'Inconsolata Nerd Font:pixelsize=30' -i -p "Choose a VM" <<< "$guests")"
+
+    VBoxManage startvm "$guest" --type "$type"
+}
+
+type="gui"
+case "$1" in
+    g) type="gui" ;;
+    s) type="sdl" ;;
+    h) type="headless" ;;
+    S) type="separate" ;;
+    *) [[ -n "$1" ]] && exit ;;  # invalid type
+esac
+
+virtualbox_home=${VBOX_HOME:-~/VirtualBox\ VMs}
+launch_guest
