@@ -168,7 +168,7 @@ ramp-capacity-2 = 
 ramp-capacity-2-foreground = ${colors.warning}
 ramp-capacity-3 = 
 ramp-capacity-3-foreground = ${colors.success}
-ramp-capacity-4 = 
+ramp-capacity-4 = 
 ramp-capacity-4-foreground = ${colors.success}
 
 [module/bspwm]
