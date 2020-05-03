@@ -1,0 +1,15 @@
+#!/bin/bash -ex
+#
+# Debian's root installation script for the Polybar status bar.
+# https://github.com/polybar/polybar
+
+# polybar dependencies
+DEBIAN_FRONTEND=noninteractive apt install -q -y build-essential git cmake cmake-data pkg-config \
+    python3-sphinx libcairo2-dev libxcb1-dev libxcb-util0-dev libxcb-randr0-dev libxcb-composite0-dev \
+    python3-xcbgen xcb-proto libxcb-image0-dev libxcb-ewmh-dev libxcb-icccm4-dev
+
+# xkeyboard module dependencies
+DEBIAN_FRONTEND=noninteractive apt install -q -y libxcb-xkb-dev
+
+# network module dependencies
+DEBIAN_FRONTEND=noninteractive apt install -q -y libnl-genl-3-dev libiw-dev
