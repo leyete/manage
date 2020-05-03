@@ -1,6 +1,6 @@
-* : bspwm/bspwmrc : $XDG_CONFIG_HOME/bspwm/bspwmrc
 * : sxhkd/sxhkdrc : $XDG_CONFIG_HOME/sxhkd/sxhkdrc
 
+cosmos : bspwm/cosmos/bspwmrc : $XDG_CONFIG_HOME/bspwm/bspwmrc
 cosmos : bspwm/cosmos/libinput-gestures.conf : $XDG_CONFIG_HOME/bspwm/libinput-gestures.conf
 
 parrot : bspwm/parrot/bspwm.desktop : /usr/share/xsessions/bspwm.desktop

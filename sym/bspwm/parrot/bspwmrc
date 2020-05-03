@@ -8,14 +8,13 @@
 # ------------------------------------------------------------------------------
 
 sxhkd &  # start the simple X hotkey daemon to manage bspwm keybindings
-libinput-gestures -c $XDG_CONFIG_HOME/bspwm/libinput-gestures.conf &
 $XDG_CONFIG_HOME/polybar/launch.sh top & # launch polybar
 
 # ------------------------------------------------------------------------------
 #   MONITORS AND WORKSPACES
 # ------------------------------------------------------------------------------
 
-bspc monitor eDP-1 -d 1 2 3 4 5 6  # my laptop built-in display
+bspc monitor Virtual1 -d 1 2 3 4 5 6  # default screen inside VirtualBox
 
 # ------------------------------------------------------------------------------
 #   CONFIG
@@ -54,6 +53,3 @@ bspc config presel_feedback_color "#5e81ac"
 # ------------------------------------------------------------------------------
 
 bspc rule -a firefox desktop=^2 follow=on
-bspc rule -a TelegramDesktop desktop=^5
-bspc rule -a discord desktop=^5
-bspc rule -a Eclipse desktop=^3 follow=on
