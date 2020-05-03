@@ -3,3 +3,5 @@
 * : polybar/config : $XDG_CONFIG_HOME/polybar/config
 
 cosmos : polybar/host-config/cosmos : $XDG_CONFIG_HOME/polybar/host-config
+
+parrot : polybar/host-config/parrot : $XDG_CONFIG_HOME/polybar/host-config
