@@ -9,7 +9,7 @@
 
 sxhkd &  # start the simple X hotkey daemon to manage bspwm keybindings
 libinput-gestures -c $XDG_CONFIG_HOME/bspwm/libinput-gestures.conf &
-$XDG_CONFIG_HOME/polybar/launch.sh top & # launch polybar
+$XDG_CONFIG_HOME/polybar/launch.sh top bottom & # launch polybar
 
 # ------------------------------------------------------------------------------
 #   MONITORS AND WORKSPACES
