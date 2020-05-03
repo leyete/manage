@@ -3,3 +3,6 @@
 cosmos : xorg/cosmos/xprofile : $XDG_CONFIG_HOME/xorg/xprofile
 cosmos : xorg/cosmos/Xresources : $XDG_CONFIG_HOME/xorg/Xresources
 cosmos : xorg/cosmos/30-touchpad.conf : /etc/X11/xorg.conf.d/30-touchpad.conf
+
+parrot : xorg/parrot/xprofile : $XDG_CONFIG_HOME/xorg/xprofile
+parrot : xorg/parrot/Xresources : $XDG_CONFIG_HOME/xorg/xprofile

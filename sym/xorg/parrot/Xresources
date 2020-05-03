@@ -1,0 +1,10 @@
+! Xresources for parrot (typically running on a VM)
+
+! Xft settings -----------------------------------------------------------------
+Xft.autohint:   true
+Xft.dpi:        192
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.hintstyle:  hintslight
+Xft.lcdfilter:  lcddefault
