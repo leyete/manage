@@ -30,6 +30,5 @@ xsetroot -cursor_name left_ptr
 #   STARTUP PROCESSES
 # ------------------------------------------------------------------------------
 
-picom &               # start the picom compositor
 nitrogen --restore &  # set the desktop background
 unclutter &           # hide the X mouse cursor when not needed
