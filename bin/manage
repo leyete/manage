@@ -326,14 +326,14 @@ cmd_link() {
         if [[ "$op_sym" -eq 1 && -f "./links" ]]; then
             # link files from the sym directory
             while read -r line; do
-                host=${host:-"$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"}
+                hostf="$(cut -d':' -f1 <<< $line | awk '{$1=$1};1')"
                 sym="$(cut -d':' -f2 <<< $line | awk '{$1=$1};1')"
                 dest="$(cut -d':' -f3 <<< $line | awk '{$1=$1};1' | envsubst)"
                 destdir="$(dirname "$dest")"
 
                 # skip unwanted entries
-                [[ "$op_host" -eq 1 && "$(cat /etc/hostname)" != "$host" ]] && continue
-                [[ "$host" != "*" && "$(cat /etc/hostname)" != "$host" ]] && continue
+                [[ "$op_host" -eq 1 && ${host:-"$(cat /etc/hostname)"} != "$hostf" ]] && continue
+                [[ "$hostf" != "*" && ${host:-"$(cat /etc/hostname)"} != "$hostf" ]] && continue
 
                 # create parent directories
                 [[ "${op_mkdir:-0}" -eq 1 ]] && mkdir -p $(dirname $dest) 2>/dev/null || true
