@@ -276,9 +276,7 @@ type = custom/script
 format = <label> 
 label = %output%
 
-exec = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -i hackthebox -s
-click-left = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -i hackthebox -x
-click-right = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -c
+exec = $XDG_CONFIG_HOME/polybar/scripts/hackthebox.sh -i hackthebox -d $HOME/CTF/htb/vpn -v 4
 
 [module/date]
 type = internal/date

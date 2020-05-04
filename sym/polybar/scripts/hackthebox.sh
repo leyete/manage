@@ -2,85 +2,75 @@
 #
 # Custom script for the 'hackthebox-vpn' module. Requires dmenu and iproute2.
 
-set -o pipefail
 
-# create the polybar_scripts temp folder
-[ ! -d "/tmp/polybar_scripts/hackthebox-vpn" ] && mkdir -p "/tmp/polybar_scripts/hackthebox-vpn"
+prepare_module() {
+    # create the polybar_scripts temp folder
+    [ ! -d "/tmp/polybar_scripts/hackthebox-vpn" ] && mkdir -p "/tmp/polybar_scripts/hackthebox-vpn"
 
-# check for dmenu and iproute2
-type dmenu >/dev/null 2>&1 || (echo "dmenu is missing"; exit)
-type ip >/dev/null 2>&1 || (echo "iproute2 is missing"; exit)
+    # check for dmenu and iproute2
+    type dmenu >/dev/null 2>&1 || (echo "dmenu is missing"; exit)
+    type ip >/dev/null 2>&1 || (echo "iproute2 is missing"; exit)
 
-# directory to store temp files (store data)
-module_home="/tmp/polybar_scripts/hackthebox-vpn"
-
-# ==============================================================================
-
-hackthebox_save_version () {
-    echo "$1" > $module_home/ipversion
+    # directory to store temp files (store data)
+    module_home="/tmp/polybar_scripts/hackthebox-vpn"
 }
 
-hackthebox_cycle () {
-    current="$(cat $module_home/ipversion 2>/dev/null || echo '4')"
-
-    case "$current" in
-        4) hackthebox_save_version 6 ;;
-        6) hackthebox_save_version 4 ;;
-        *) echo "ERROR: unknown protocol"; hackthebox_save_version 4 ;;
-    esac
-
-    hackthebox_show
-}
-
-hackthebox_show () {
-    current="$(cat $module_home/ipversion 2>/dev/null || echo '4')"
-
-    [ ! -f "$module_home/connection" ] && (echo "%{F#4C566A} %{u-}"; exit)
-
-    case "$current" in
-        4) echo "$(ip -4 a show $1 2>/dev/null | grep inet | awk '{print $2}' | cut -d'/' -f1) %{F#A3BE8C} %{u-}" ;;
-        6) echo "$(ip -6 a show $1 2>/dev/null | grep inet | awk '{print $2}' | cut -d'/' -f1 | head -1) %{F#A3BE8C} %{u-}" ;;
+hackthebox_ip () {
+    case "$version" in
+        4) ip -4 a show $1 2>/dev/null | grep inet | awk '{print $2}' | cut -d'/' -f1 ;;
+        6) ip -6 a show $1 2>/dev/null | grep inet | awk '{print $2}' | cut -d'/' -f1 | head -1 ;;
         *) echo -n "ERROR: unknown protocol" ;;
     esac
 }
 
-hackthebox_toggle_connection () {
-    if [ ! -f "$module_home/connection" ]; then  # start a connection
-        [ ! -d "$datadir" ] && (echo "ERROR: datadir ($datadir) missing"; exit 1)
-
-        choice=$(for i in $datadir/*; do echo "$(basename $i)"; done | dmenu -i -p 'Select ovpn: ')
-
-        if [ -f "$datadir/$choice" ]; then
-            sudo -A openvpn $datadir/$choice >"$module_home/openvpn.log" 2>&1 &
-            echo "$!" > "$module_home/connection"
-        else
-            echo "ERROR: missing ovpn file ($datadir/$choice)"
-        fi
-
-    else  # disconnect
-        sudo -A kill -TERM "$(cat "$module_home/connection")"
-        rm -f "$module_home/connection"
+module_run() {
+    if [ ! -f "$module_home/connection" ]; then
+        # disconnected
+        echo "%{F#4C566A}%{A:$0 -d "$vpn_dir" -i "$hackthebox_iface" c:} %{A}%{F-}"
+    else
+        # connected
+        echo "%{A:$0 d:}%{A3:$0 -i "$hackthebox_iface" -v $([ "$version" -eq 4 ] && echo "6" || echo "4"):}$(hackthebox_ip) %{F#A3BE8C} %{F-}%{A}%{A}"
     fi
 }
 
-hackthebox_iface="tun0"
-datadir="$HOME/CTF/htb/vpn"
+vpn_connect() {
+    [ -f "$module_home/connection" ] || [ ! -d "$vpn_dir" ] && return
 
-while getopts ":d:xcsi:" op; do
+    c=$(for i in "$vpn_dir"/*; do echo "$(basename i)"; done | dmenu -fn 'Inconsolata Nerd Font:pixelsize=30' -i -p 'Select ovpn: ')
+    if [ -f "$vpn_dir/$c" ]; then
+        sudo -A openvpn "$vpn_dir/$c" > "$module_home/openvpn.log" 2>&1 &
+        echo "$!" > "$module_home/connection"
+    fi
+}
+
+vpn_disconnect() {
+    [ ! -f "$module_home/connection" ] && return
+
+    sudo -A kill -TERM "$(cat "$module_home/connection")"
+    rm -f "$module_home/connection"
+}
+
+
+hackthebox_iface="tun0"
+vpn_dir="$HOME/CTF/htb/vpn"
+version="4"
+
+while getopts ":d:i:v" op; do
     case "$op" in
-        c) action=cycle ;;
-        s) action=show ;;
-        x) action=toggle ;;
-        d) datadir="$OPTARG" ;;
+        d) vpn_dir="$OPTARG" ;;
         i) hackthebox_iface="$OPTARG" ;;
+        v) version="$OPTARG" ;;
         :) echo "ERROR: -$OPTARG requires an argument"; exit 1 ;;
         *) echo "ERROR: unknown option"; exit 1 ;;
     esac
 done
+shift $((OPTIND-1))
 
-case "$action" in
-    cycle) hackthebox_cycle ;;
-    show) hackthebox_show "${hackthebox_iface:-tun0}" ;;
-    toggle) hackthebox_toggle_connection ;;
-    *) echo "ERROR: unknown action '$action'"; exit 1 ;;
-esac
+if [ "$#" -gt 0 ]; then
+    case "$1" in
+        c) vpn_connect ;;
+        d) vpn_disconnect ;;
+    esac
+fi
+
+module_run
