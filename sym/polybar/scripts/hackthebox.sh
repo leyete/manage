@@ -36,7 +36,7 @@ module_run() {
 vpn_connect() {
     [ -f "$module_home/connection" ] || [ ! -d "$vpn_dir" ] && return
 
-    c=$(for i in "$vpn_dir"/*; do echo "$(basename i)"; done | dmenu -fn 'Inconsolata Nerd Font:pixelsize=30' -i -p 'Select ovpn: ')
+    c=$(for i in "$vpn_dir"/*; do echo "$(basename $i)"; done | dmenu -fn 'Inconsolata Nerd Font:pixelsize=30' -i -p 'Select ovpn: ')
     if [ -f "$vpn_dir/$c" ]; then
         sudo -A openvpn "$vpn_dir/$c" > "$module_home/openvpn.log" 2>&1 &
         echo "$!" > "$module_home/connection"
